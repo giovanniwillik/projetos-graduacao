@@ -1,13 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h> // Biblioteca que contém a função para calcular a raiz quadrada "sqrt()"
 #include <limits.h> // Biblioteca que contém as constantes "INT_MIN" e "INT_MAX"
 
 #define MAX_SIZE 255  // Define o tamanho máximo da matriz quadrada
 
 // Função para alocar memória para a matriz (dinâmicamente)
 int** inicializarMatriz (int dimensao) {
-    int** matriz = (int**) malloc (dimensao * sizeof (int*)) // int** matriz == int matriz[][]
+    int** matriz = (int**) malloc (dimensao * sizeof (int*)); // int** matriz == int matriz[][]
     if (matriz == NULL) {
         perror("Erro ao alocar memória para a matriz"); // Exibe mensagem de erro caso a alocação falhe
         return NULL; 
@@ -84,13 +83,13 @@ void acharMinMax (int** matriz, int XInicio, int XFim, int YInicio, int YFim, in
         // Caso base: uma única célula
         int valor = matriz[XInicio][YInicio];
         // Considerando caso de empate no valor mínimo
-        if (((valor == *min) && (XInicio < XMin)) || ((valor == *min) && (XInicio == XMin) && (YInicio < YMin))) {
+        if (((valor == *min) && (XInicio < *XMin)) || ((valor == *min) && (XInicio == *XMin) && (YInicio < *YMin))) {
             *min = valor;
             *XMin = XInicio;
             *YMin = YInicio;
         }
         // Considerando caso de empate no valor máximo
-        if (((valor == *max) && (XInicio < XMax)) || ((valor == *max) && (XInicio == XMax) && (YInicio < YMax))) {
+        if (((valor == *max) && (XInicio < *XMax)) || ((valor == *max) && (XInicio == *XMax) && (YInicio < *YMax))) {
             *max = valor;
             *XMax = XInicio;
             *YMax = YInicio;
@@ -127,28 +126,26 @@ void escreverResultado (const char* arquivoSaida, int min, int XMin, int YMin, i
         perror("Erro ao abrir o arquivo de saída");
         return;
     }
-    fprintf(arquivo, "min =  %d; pos = (%d, %d)\n", min, minX, minY);
-    fprintf(arquivo, "max = %d; pos = (%d, %d)\n", max, maxX, maxY);
+    fprintf(arquivo, "min =  %d; pos = (%d, %d)\n", min, XMin, YMin);
+    fprintf(arquivo, "max = %d; pos = (%d, %d)\n", max, XMax, YMax);
     fclose (arquivo);
 }
 
 int main (int argc, char* argv[]) {
     if (argc < 4) {
-        fprintf(stderr, "Uso: %s <tamanho> <arquivo_entrada> <arquivo_saida>\n", argv[0]);
+        fprintf(stderr, "Uso: %s <dimensão> <arquivo_entrada> <arquivo_saida>\n", argv[0]);
         return 1;
     }
     
-    int tamanho = atoi(argv[1]); // atoi: função que converte string para int
-    const char* arquivoEntrada = argv[2]
-    const char* arquivoSaida = argv[3]
+    int dimensao = atoi(argv[1]); // atoi: função que converte string para int
+    const char* arquivoEntrada = argv[2];
+    const char* arquivoSaida = argv[3];
     
-    // Retornando erro caso o tamanho é um inteiro N potência de 2 e no máximo 64
-    if ((tamanho != 1) && (tamanho != 2) && (tamanho != 4) && (tamanho != 8) && (tamanho != 16) && (tamanho != 32) && (tamanho != 64)) {
-        fprintf(stderr, "O tamanho só é válido para inteiros que são potência de 2 e com valor máximo de 64 \n");
+    // Retornando erro caso o dimensão é um inteiro N potência de 2 e no máximo 64
+    if ((dimensao != 1) && (dimensao != 2) && (dimensao != 4) && (dimensao != 8) && (dimensao != 16) && (dimensao != 32) && (dimensao != 64)) {
+        fprintf(stderr, "A dimensão só é válida para inteiros que são potência de 2 e com valor máximo de 64 \n");
         return 1;
     }
-    
-    int dimensao = sqrt(tamanho); // Definição da dimensão da matriz quadrada. Ex: tamanho = 64 -> dimensao = 8
     
     // Retornando erro caso a matriz seja nula
     int** matriz = inicializarMatriz(dimensao);
@@ -157,15 +154,15 @@ int main (int argc, char* argv[]) {
     }
     
     // Retornando erro caso haja falha na leitura do arquivo de entrada
-    if (lerArquivo (arquivoEntrada, matriz, tamanho) != 0) {
+    if (lerArquivo (arquivoEntrada, matriz, dimensao) != 0) {
         liberarMatriz (matriz, dimensao); // Liberando espaço que havia sido alocado
         return 1;
     }
     
     // Declarando variáveis que serão utilizadas em acharMinMax()
-    int min, XMin, YMin = INT_MAX; // min inicializa como o maior inteiro possível para garantir que seu valor seja trocado na primeira interaçaõ de acharMinMax()
-    int max, XMax, YMax = INT_MIN; // max inicializa como o menor inteiro possível para garantir que seu valor seja trocado na primeira interaçaõ de acharMinMax()
-    
+    int min = INT_MAX; // min inicializa como o maior inteiro possível para garantir que seu valor seja trocado na primeira interaçaõ de acharMinMax()
+    int max = INT_MIN; // max inicializa como o menor inteiro possível para garantir que seu valor seja trocado na primeira interaçaõ de acharMinMax()
+    int XMin, YMin, XMax, YMax;
     // Descobrindo valores de min, max, XMin, XMax, YMin, YMax
     acharMinMax (matriz, 0, dimensao - 1, 0, dimensao - 1, &min, &max, &XMin, &XMax, &YMin, &YMax);
     // Escrevendo resultado no arquivo de saída
