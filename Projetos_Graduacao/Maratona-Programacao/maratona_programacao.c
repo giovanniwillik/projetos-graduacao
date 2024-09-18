@@ -193,12 +193,81 @@ Durante a atualizacao da posicao dos elementos da lista ligada preste bastante
 atencao para atualizar todos os ponteiros necessarios e nao esqueca que a lista
 e duplamente ligada e possui no cabeca.
 */
-bool tratarSubmissao(MARATONA *mar, int id, int problema, int tempo,
-                     bool acerto) {
+bool tratarSubmissao(MARATONA *mar, int id, int problema, int tempo, bool acerto) {
+  // Os parâmetros são válidos?
+  if ((mar == NULL) || (id < 1 || id > mar->numTimes) || (problema < 0 || problema > (PROBLEMAS - 1))) {
+    return false;
+  }
 
-  /* Complete o codigo desta funcao */
+  // Pegando o time equivalente ao id passado no parâmetro (armazenado no PONT ptime)
+  PONT ptime = mar->cabeca->prox;
+  
+  while (ptime != NULL && ptime->time->id != id) {
+    ptime = ptime->prox;
+  }
 
-  return false;
+  if (ptime == NULL) {
+    return false;  // Retorna falso se por algum motivo não for encontrado o time
+  }
+
+  TIME *time = ptime->time;
+
+  // Verificando se o problema já foi resolvido
+  if (time->resolvidos[problema] == true) {
+    return false;  // Problema já resolvido, ignorar submissão (não hpa nenhuma alteração a ser feita)
+  }
+
+  // Incrementando o número de tentativas para o problema
+  time->tentativas[problema]++;
+
+  // Se a submissão foi correta:
+  if (acerto == true) {
+    time->resolvidos[problema] = true;
+    time->minutos[problema] = tempo;
+
+    // Agora precisamos reposicionar o time na lista, se necessário (a lista está organizada em ordem decrescente)
+    PONT atual = ptime->prox;
+
+    // Remove o time da sua posição atual, para não dar problema quando for percorrer a lista para realocar o elemento
+    ptime->ant->prox = ptime->prox;
+    if (ptime->prox != NULL) {
+      ptime->prox->ant = ptime->ant;
+    }
+
+    // Percorre a lista a partir do próximo elemento para encontrar a nova posição
+    while (atual != NULL) {
+      int problemasResolvidosAtual = calcularProblemasResolvidosDoTime(atual->time);
+      int penalidadeAtual = calcularPenalidade(atual->time);
+      int problemasResolvidosTime = calcularProblemasResolvidosDoTime(time);
+      int penalidadeTime = calcularPenalidade(time);
+
+      if (problemasResolvidosTime > problemasResolvidosAtual || 
+         (problemasResolvidosTime == problemasResolvidosAtual && penalidadeTime < penalidadeAtual)) {
+        // O time deve ficar antes do "atual" (quebra do loop retorna o "atual" como o próximo elemento do elemento a ser alocado)
+        break;
+      }
+
+      atual = atual->prox;
+    }
+
+    // Inserindo o time na nova posição
+    if (atual == NULL) {  // Inserindo no final
+      PONT ultimo = mar->cabeca; // Colocando na variável "ultimo" o antigo último elemento do arranjo 
+      while (ultimo->prox != NULL) {
+        ultimo = ultimo->prox;
+      }
+      ultimo->prox = ptime;
+      ptime->ant = ultimo;
+      ptime->prox = NULL;
+    } else {  // Inserindo antes do elemento "atual"
+      ptime->prox = atual;
+      ptime->ant = atual->ant;
+      atual->ant->prox = ptime;
+      atual->ant = ptime;
+    }
+  }
+
+  return true;
 }
 
 /*
