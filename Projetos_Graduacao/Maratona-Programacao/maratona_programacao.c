@@ -214,7 +214,7 @@ bool tratarSubmissao(MARATONA *mar, int id, int problema, int tempo, bool acerto
 
   // Verificando se o problema já foi resolvido
   if (time->resolvidos[problema] == true) {
-    return false;  // Problema já resolvido, ignorar submissão (não hpa nenhuma alteração a ser feita)
+    return false;  // Problema já resolvido, ignorar submissão (não há nenhuma alteração a ser feita)
   }
 
   // Incrementando o número de tentativas para o problema
@@ -224,9 +224,8 @@ bool tratarSubmissao(MARATONA *mar, int id, int problema, int tempo, bool acerto
   if (acerto == true) {
     time->resolvidos[problema] = true;
     time->minutos[problema] = tempo;
-
-    // Agora precisamos reposicionar o time na lista, se necessário (a lista está organizada em ordem decrescente)
-    PONT atual = ptime->prox;
+    
+    PONT atual = mar->cabeca->prox;
 
     // Remove o time da sua posição atual, para não dar problema quando for percorrer a lista para realocar o elemento
     ptime->ant->prox = ptime->prox;
