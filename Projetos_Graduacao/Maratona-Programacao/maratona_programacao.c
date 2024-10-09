@@ -1,13 +1,3 @@
-/*********************************************************************/
-/** ACH2023 - Algoritmos e Estruturas de Dados I **/
-/** EACH-USP - Segundo Semestre de 2024 **/
-/** **/
-/** Primeiro Exercicio-Programa **/
-/** **/
-/** <nome do(a) aluno(a)> <numero USP> <turma> **/
-/** **/
-/*********************************************************************/
-
 /*
 A Maratona de Programacao que voce gerenciara tem um numero fixo de problemas
 definido na constante PROBLEMAS. Os problemas da maratona serao numerados de 0
