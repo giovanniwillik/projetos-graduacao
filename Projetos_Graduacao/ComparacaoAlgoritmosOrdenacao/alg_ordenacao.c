@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <math.h>
 
 // Estrutura Registro com alocação dinâmica para campoDaEstrutura
 typedef struct {
@@ -23,6 +24,14 @@ double medirTempo(void (*func)(Registro*, int), Registro *vetor, int n) {
     clock_t inicio, fim;
     inicio = clock();
     func(vetor, n);
+    fim = clock();
+    return ((double)(fim - inicio)) / CLOCKS_PER_SEC;
+}
+
+double medirTempoMergeSort(void (*func)(Registro*, int, int), Registro *vetor, int i, int f) {
+    clock_t inicio, fim;
+    inicio = clock();
+    func(vetor, i, f);
     fim = clock();
     return ((double)(fim - inicio)) / CLOCKS_PER_SEC;
 }
@@ -111,7 +120,50 @@ void shellSort(Registro *vetor, int n) {
     }  
 }
 
-void mergeSort(Registro *vetor, int n);
+void mergeSort(Registro *vetor, int i, int f) {
+    int m = (i + f)/2;
+    if (i < f) {
+        mergeSort(vetor, i, m);
+        mergeSort(vetor, m+1, f);
+        int *temp, v1, v2, tamanho, i, j, k;
+        int fim1 = 0, fim2 = 0;
+        tamanho = f-i+1;
+        v1 = i;
+        v2 = m+1;
+        temp = (int*) malloc(tamanho*sizeof(int));
+        if (temp != NULL) {
+            for (i = 0; i < tamanho; i++) {
+                if (!fim1 && !fim2) {
+                    if (vetor[v1].chave < vetor[v2].chave) {
+                        temp[i] = vetor[v1].chave;
+                        v1++;
+                    }
+                    else{
+                        temp[i] = vetor[v2].chave;
+                        v2++;
+                    }
+                    if (v1 > m) fim1 = 1;
+                    if (v2 > f) fim2 = 1;
+                }
+                else {
+                    if (!fim1) {
+                        temp[i] = vetor[v1].chave;
+                        v1++;
+                    }
+                    else {
+                        temp[i] = vetor[v2].chave;
+                        v2++;                        
+                    }
+                }
+            }
+            for (j = 0, k = i; j < tamanho; j++, k++) {
+                vetor[k].chave = temp[j];
+            }
+            free(temp);
+        }
+    }
+
+}
 void heapSort(Registro *vetor, int n);
 void quickSort(Registro *vetor, int n);
 
@@ -203,7 +255,7 @@ int main() {
             // Merge Sort
             vetor = carregarDados(arquivos[i], &n, tamanhos[j]);
             resetarContadores();
-            tempo_execucao = medirTempo(mergeSort, vetor, n);
+            tempo_execucao = medirTempoMergeSort(mergeSort, vetor, 0, n-1);
             printf("Merge Sort - Tempo: %.4fs, Comparacoes: %lld, Movimentacoes: %lld\n",
                    tempo_execucao, num_comparacoes, num_movimentacoes);
             liberarDados(vetor, n);
