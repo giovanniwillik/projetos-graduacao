@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
+#include <stdbool.h>
 
 // Estrutura Registro com alocação dinâmica para campoDaEstrutura
 typedef struct {
@@ -39,19 +40,19 @@ double medirTempoMergeSort(void (*func)(Registro*, int, int), Registro *vetor, i
 void insertionSort(Registro *vetor, int n) {
 	for (int i = 1; i < n; i++) {
         num_movimentacoes++;
-    	int key = vetor[i].chave;
+    	Registro key = vetor[i];
     	int j = i - 1;
     	// Move elementos do vetor[0..i-1].chave que são maiores que key
        	// para uma posição à frente da sua posição atual
-        while (j >= 0 && vetor[j].chave > key) {
+        while (j >= 0 && vetor[j].chave > key.chave) {
             num_comparacoes++;
-        	vetor[j + 1].chave = vetor[j].chave;
+        	vetor[j + 1] = vetor[j];
             num_movimentacoes++;
         	j = j - 1;
         }	
         if (j >= 0) num_comparacoes++; // Contabiliza a comparação que faz o while parar
         
-        vetor[j + 1].chave = key;
+        vetor[j + 1] = key;
         num_movimentacoes++;  // Contabiliza a movimentação ao inserir a key
     }  
 }
@@ -68,28 +69,34 @@ void selectionSort(Registro *vetor, int n) {
         }
         // Troca o menor elemento encontrado com o primeiro elemento
         if (min_idx != i) { // Só troca se min_idx for diferente de i
-            int temp = vetor[min_idx].chave;
-            vetor[min_idx].chave = vetor[i].chave;
-            vetor[i].chave = temp;
+            Registro temp = vetor[min_idx];
+            vetor[min_idx] = vetor[i];
+            vetor[i] = temp;
             num_movimentacoes += 3;  // Incrementa as movimentações (3 atribuições para a troca)
         }
 	}
 }
 
 void bubbleSort(Registro *vetor, int n) {
-    int end, i, temp;
+    int end, i;
+    Registro temp;
     // end é o último elemento do vetor, o lugar no qual o maior elemento precisa se deslocar
     for (end = n-1; end > 0; end--) {
         // a cada ciclo será ajustado a ordenação do par i e i+1
+        bool movimentou = false;
         for (i = 0; i < end; i++) {
             // confere se a ordem está errada
             num_comparacoes++;
             if (vetor[i].chave > vetor[i+1].chave) {
                 num_movimentacoes += 3;
-                temp = vetor[i].chave;
-                vetor[i].chave = vetor[i+1].chave;
-                vetor[i+1].chave = temp;
+                temp = vetor[i];
+                vetor[i] = vetor[i+1];
+                vetor[i+1] = temp;
+                movimentou = true;
             }
+        }
+        if (!movimentou) {
+            return;
         }
     }
 }
@@ -101,13 +108,13 @@ void shellSort(Registro *vetor, int n) {
         h = (h-1)/3;
         for (j = h; j < n; j++) {
             num_movimentacoes++;
-            key = vetor[j].chave;
+            Registro key = vetor[j];
             i = j;
             while (i >= h) {
                 num_comparacoes++;
-                if (vetor[i - h].chave > key) {
+                if (vetor[i - h].chave > key.chave) {
                     num_movimentacoes++;
-                    vetor[i].chave = vetor[i - h].chave;
+                    vetor[i] = vetor[i - h];
                     i = i - h;
                 }
                 else {
@@ -115,7 +122,7 @@ void shellSort(Registro *vetor, int n) {
                 }
             }
             num_movimentacoes++;
-            vetor[i].chave = key;
+            vetor[i] = key;
         }
     }  
 }
