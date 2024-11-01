@@ -132,21 +132,22 @@ void mergeSort(Registro *vetor, int i, int f) {
     if (i < f) {
         mergeSort(vetor, i, m);
         mergeSort(vetor, m+1, f);
-        int *temp, v1, v2, tamanho, i, j, k;
+        int v1, v2, tamanho, i, j, k;
+        Registro* temp;
         int fim1 = 0, fim2 = 0;
         tamanho = f-i+1;
         v1 = i;
         v2 = m+1;
-        temp = (int*) malloc(tamanho*sizeof(int));
+        temp = (Registro*) malloc(tamanho*sizeof(Registro));
         if (temp != NULL) {
             for (i = 0; i < tamanho; i++) {
                 if (!fim1 && !fim2) {
                     if (vetor[v1].chave < vetor[v2].chave) {
-                        temp[i] = vetor[v1].chave;
+                        temp[i] = vetor[v1];
                         v1++;
                     }
                     else{
-                        temp[i] = vetor[v2].chave;
+                        temp[i] = vetor[v2];
                         v2++;
                     }
                     if (v1 > m) fim1 = 1;
@@ -154,24 +155,68 @@ void mergeSort(Registro *vetor, int i, int f) {
                 }
                 else {
                     if (!fim1) {
-                        temp[i] = vetor[v1].chave;
+                        temp[i] = vetor[v1];
                         v1++;
                     }
                     else {
-                        temp[i] = vetor[v2].chave;
+                        temp[i] = vetor[v2];
                         v2++;                        
                     }
                 }
             }
             for (j = 0, k = i; j < tamanho; j++, k++) {
-                vetor[k].chave = temp[j];
+                vetor[k] = temp[j];
             }
             free(temp);
         }
     }
 
 }
-void heapSort(Registro *vetor, int n);
+
+void refazHeapMaximo (Registro *vetor, int i, int n) {
+    int l;
+    int r;
+    if (i == 0) {
+        l = 1;
+        r = 2;
+    } else {
+        l = 2*i;
+        r = (2*i)+1;
+    }
+    int maior;
+    num_comparacoes++;
+    if (l <= n && vetor[l].chave > vetor[i].chave) {
+        maior = l;
+    } else {
+        maior = i;
+    }
+    num_comparacoes++;
+    if (r <= n && vetor[r].chave > vetor[maior].chave) {
+        maior = r; 
+    }
+    if (maior != i) {
+        num_movimentacoes += 3;
+        Registro temp = vetor[maior];
+        vetor[maior] = vetor[i];
+        vetor[i] = temp;
+        refazHeapMaximo(vetor, maior, n);
+    }
+}
+void heapSort(Registro *vetor, int n) {
+    int tamanho = n;
+    for (int i = n/2; i > 0; i--) {
+        refazHeapMaximo (vetor, i, n);
+    }
+    for (int i = n; i < 1; i--) {
+        num_movimentacoes += 3;
+        Registro temp = vetor[i];
+        vetor[i] = vetor[0];
+        vetor[0] = temp;
+        tamanho--; 
+        refazHeapMaximo(vetor, 0, tamanho);
+    }
+}
+
 void quickSort(Registro *vetor, int n);
 
 // Função para carregar os dados do arquivo
