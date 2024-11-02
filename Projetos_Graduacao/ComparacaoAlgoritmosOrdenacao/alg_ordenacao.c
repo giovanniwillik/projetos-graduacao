@@ -29,7 +29,7 @@ double medirTempo(void (*func)(Registro*, int), Registro *vetor, int n) {
     return ((double)(fim - inicio)) / CLOCKS_PER_SEC;
 }
 
-double medirTempoMergeSort(void (*func)(Registro*, int, int), Registro *vetor, int i, int f) {
+double medirTempo3Param(void (*func)(Registro*, int, int), Registro *vetor, int i, int f) {
     clock_t inicio, fim;
     inicio = clock();
     func(vetor, i, f);
@@ -213,11 +213,53 @@ void heapSort(Registro *vetor, int n) {
         vetor[i] = vetor[0];
         vetor[0] = temp;
         tamanho--; 
-        refazHeapMaximo(vetor, 0, tamanho);
+        refazHeapMaximo(vetor, n-tamanho, tamanho);
     }
 }
 
-void quickSort(Registro *vetor, int n);
+int particao(Registro *vetor, int p, int r) {
+    int x = vetor[r].chave;
+    int i = p-1;
+    Registro temp;
+    for (int j = p; p < r; p++) {
+        num_comparacoes++;
+        if (vetor[j].chave <= x) {
+            i++;
+            num_movimentacoes += 3;
+            temp = vetor[i];
+            vetor[i] = vetor[j];
+            vetor[j] = temp; 
+        }
+    }
+    num_movimentacoes += 3;
+    temp = vetor[i+1];
+    vetor[i+1] = vetor[r];
+    vetor[r] = temp;
+    return i+1;
+}
+int particaoAleatoria(Registro *vetor, int p, int r) {
+    int deslocamento, i;
+    Registro temp;
+    time_t t;
+    /* Inicializa gerador de número aleatorio */
+    srand((unsigned) time(&t));
+    // Escolhe um numero aleatorio entre p e r
+    deslocamento = rand() % (r-p+1); //retorna um int entre 0 e (r-p)
+    i = p + deslocamento; // i eh tal que p <= i <= r
+    // Troca de posicao A[i] e A[r]
+    num_movimentacoes += 3;
+    temp = vetor[r];
+    vetor[r] = vetor[i];
+    vetor[i] = temp;
+    return particao(vetor, p, r);
+}
+void quickSort(Registro *vetor, int p, int r) {
+    if (p < r) {
+        int q = particaoAleatoria(vetor, p, r);
+        quickSort(vetor, p, q-1);
+        quickSort(vetor, q+1, r);
+    }
+}
 
 // Função para carregar os dados do arquivo
 Registro* carregarDados(const char *nome_arquivo, int *n, int tamanho_campo) {
@@ -307,7 +349,7 @@ int main() {
             // Merge Sort
             vetor = carregarDados(arquivos[i], &n, tamanhos[j]);
             resetarContadores();
-            tempo_execucao = medirTempoMergeSort(mergeSort, vetor, 0, n-1);
+            tempo_execucao = medirTempo3Param(mergeSort, vetor, 0, n-1);
             printf("Merge Sort - Tempo: %.4fs, Comparacoes: %lld, Movimentacoes: %lld\n",
                    tempo_execucao, num_comparacoes, num_movimentacoes);
             liberarDados(vetor, n);
@@ -323,7 +365,7 @@ int main() {
             // Quick Sort
             vetor = carregarDados(arquivos[i], &n, tamanhos[j]);
             resetarContadores();
-            tempo_execucao = medirTempo(quickSort, vetor, n);
+            tempo_execucao = medirTempo3Param(quickSort, vetor, 0, n-1);
             printf("Quick Sort - Tempo: %.4fs, Comparacoes: %lld, Movimentacoes: %lld\n",
                    tempo_execucao, num_comparacoes, num_movimentacoes);
             liberarDados(vetor, n);
