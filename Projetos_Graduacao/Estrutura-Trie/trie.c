@@ -67,10 +67,13 @@ int contarNos(PONT atual){
 	if (!atual) return 0;
 	int res = 1;
 	int i;
-	if (atual->filhos) 
-		for (i=0;i<LETRAS;i++)
-			if (atual->filhos[i])
+	if (atual->filhos) {
+		for (i=0;i<LETRAS;i++) {
+			if (atual->filhos[i]) {
 				res += contarNos(atual->filhos[i]);
+			}
+		}
+	}
 	return res;
 }
 
@@ -82,11 +85,13 @@ int contarArranjos(PONT atual){
 	if (!atual) return 0;
 	int res = 0;
 	int i;
-	if (atual->filhos){
+	if (atual->filhos) {
 		res++; 
-		for (i=0;i<LETRAS;i++)
-			if (atual->filhos[i])
+		for (i=0;i<LETRAS;i++) {
+			if (atual->filhos[i]) {
 				res += contarArranjos(atual->filhos[i]);
+			}
+		}
 	}
 	return res;
 }
@@ -100,10 +105,13 @@ int contarPalavrasDiferentes(PONT atual){
 	int res = 0;
 	if (atual->contador>0) res = 1;
 	int i;
-	if (atual->filhos) 
-		for (i=0;i<LETRAS;i++)
-			if (atual->filhos[i])
+	if (atual->filhos) {
+		for (i=0;i<LETRAS;i++) {
+			if (atual->filhos[i]) {
 				res += contarPalavrasDiferentes(atual->filhos[i]);
+			}
+		}
+	}
 	return res;
 }
 
@@ -116,10 +124,13 @@ int contarPalavras(PONT atual){
 	if (!atual) return 0;
 	int res = atual->contador;
 	int i;
-	if (atual->filhos) 
-		for (i=0;i<LETRAS;i++)
-			if (atual->filhos[i])
+	if (atual->filhos) {
+		for (i=0;i<LETRAS;i++) {
+			if (atual->filhos[i]) {
 				res += contarPalavras(atual->filhos[i]);
+			}
+		}
+	}
 	return res;
 }
 
@@ -130,17 +141,19 @@ Funcao recursiva que recebe o endereco de um no, o endereco de um arranjo de car
 */
 void exibirAux(PONT atual, char* palavra, int pos){
 	if (!atual) return;
-	if (atual->contador>0){
+	if (atual->contador>0) {
 		palavra[pos] = '\0';
 		printf("%3i %s [%i]\n", atual->contador,palavra, pos);
 	}
 	int i;
-	if (atual->filhos) 
-		for (i=0;i<LETRAS;i++)
+	if (atual->filhos) {
+		for (i=0;i<LETRAS;i++) {
 			if (atual->filhos[i]){
 				palavra[pos] = (char)(VALOR_a+i);
 				exibirAux(atual->filhos[i], palavra, pos+1);
 			}
+		}
+	}
 }
 
 
@@ -148,21 +161,31 @@ void exibirAux(PONT atual, char* palavra, int pos){
 /*
 Funcao que recebe o endereco da raiz de uma trie e o endereco de um arranjo de caracteres e imprime na tela, em ordem alfabetica, todas as palavras da trie (utilizando a funcao exibirAux). O arranjo de caracteres, chamado palavra, e usado para  compor cada palavra a partir da raiz e entao imprimir essas palavras.
 */
-void exibir(PONT raiz, char* palavra){
+void exibir(PONT raiz, char* palavra) {
 	exibirAux(raiz, palavra, 0);
 }
 
-
+int mapearLetraAtual (char c) {
+	return ((int) c - VALOR_a);
+}
 
 /*
 Funcao que recebe o endereco do no raiz de uma trie (raiz), o endereco de um arranjo de caracteres (palavra) e o tamanho da palavra presente no arranjo de caracteres (n) e retorna o numero de copias dessa palavra na trie. Provavelmente voce desejara realizar a busca chamando uma funcao auxiliar recursiva (desenvolvida por voce) que tenha, ao menos, um parametro adicional para indicar qual a letra atual da busca. Caso a palavra nao exista na trie, sua funcao devera retornar 0 (zero), caso contrario, devera retornar o valor do campo contador do no correspondente a ultima letra da palavra.
 */
-int buscarPalavra(PONT raiz, char* palavra, int n){
-  int resposta = 0;
-  
-  /* Complete o codigo desta funcao */ 
-
-  return resposta;
+int buscarPalavra(PONT raiz, char* palavra, int n) {
+  	int resposta = 0;
+ 	int nivel;
+  	int i;
+  	PONT p = raiz;
+  	for (nivel = 0; nivel < n; nivel++) {
+		i = mapearLetraAtual(palavra[nivel]);
+		if (!p->filhos[i]) {
+			resposta = p->contador;
+		}
+		p = p->filhos[i];
+	}
+	resposta = p->contador;
+ 	return resposta;
 }
 
 
@@ -175,10 +198,18 @@ Funcao que recebe o endereco do no raiz de uma trie (raiz), o endereco de um arr
   (ii) se ainda falta inserir caractere(s) e o no atual possui o arranjo de filhos: caso o no correspondente ao proximo caractere ja exista no arranjo de filhos, basta prosseguir a insercao (recursivamente) a partir dele, caso contrario e necessario prosseguir de acordo com o processo (i.b).
   (iii) se voce chegou ao ultimo caractere da palavra e ele ja existe na trie, e necessario incrementar seu campo contador em uma unidade.
 */
-void inserir(PONT raiz, char* palavra, int n){
-
-  /* Complete o codigo desta funcao */ 
-  
+void inserir(PONT raiz, char* palavra, int n) {
+ 	int nivel;
+  	int i;
+  	PONT p = raiz;
+  	for (nivel = 0; nivel < n; nivel++) {
+		i = mapearLetraAtual(palavra[nivel]);
+		if (!p->filhos[i]) {
+			p->filhos[i] =criarNo();
+		}
+		p = p->filhos[i];
+	}
+	p->contador++;
 }
 
 
@@ -193,7 +224,7 @@ Funcao que recebe o endereco do no raiz de uma trie (raiz), o endereco de um arr
     (b) Caso o no correspondente a ultima letra nao possua filhos ele devera ser excluido, e o ponteiro para ele no arranjo de filhos de seu pai deve ser atualizado para NULL. Se apos essa exclusao, o pai desse no nao possuir mais filhos, seu arranjo de filhos deve ser excluido (memoria liberada) e seu campo filhos deve receber o valor NULL. Adicionalmente, se o campo contador do no pai valer zero este tambem deve ser apagado (e o processo iii.b deve ser repetido enquanto cada no [na volta da recursao] nao possuir mais filhos e nao for um no final de uma palavra).
 Observacao: o no raiz nunca devera ser excluido, porem seu arranjo de filhos podera ser excluido caso este no nao possua filhos (trie sem nenhuma palavra) e, neste caso, seu campo filhos devera ser atualizado para NULL.
 */
-void excluirTodas(PONT raiz, char* palavra, int n){
+void excluirTodas(PONT raiz, char* palavra, int n) {
 
   /* Complete o codigo desta funcao */ 
 
@@ -204,7 +235,7 @@ void excluirTodas(PONT raiz, char* palavra, int n){
 /*
 Funcao que recebe o endereco do no raiz de uma trie (raiz), o endereco de um arranjo de caracteres (palavra) e o tamanho da palavra presente no arranjo de caracteres (n) e exclui uma copia dessa palavra da trie (isto e, caso a palavra exista na trie, diminui o contador correspondente a sua ultima letra em uma unidade). Observacoes: se a palavra nao existir na trie, nao ha nada a ser feito pela funcao; se a palavra existir e o contador valer 1 (um) antes da exclusao, entao a exclusao tera o mesmo comportamento da funcao excluirTodas.
 */
-void excluir(PONT raiz, char* palavra, int n){
+void excluir(PONT raiz, char* palavra, int n) {
 
   /* Complete o codigo desta funcao */ 
 
@@ -217,7 +248,7 @@ void excluir(PONT raiz, char* palavra, int n){
 Funcao main que realiza ALGUNS testes nas funcoes implementadas.
 Seu EP sera avaliado utilizando um conjunto distinto de testes.
 */
-int main(){
+int main() {
 	NO raiz1;
 	char* temp = (char*)malloc(sizeof(char)*1025);
 
