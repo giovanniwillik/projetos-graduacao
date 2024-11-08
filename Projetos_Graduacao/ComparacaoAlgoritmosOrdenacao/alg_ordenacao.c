@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <math.h>
 #include <stdbool.h>
 
 // Estrutura Registro com alocação dinâmica para campoDaEstrutura
@@ -20,244 +19,193 @@ void resetarContadores() {
     num_movimentacoes = 0;
 }
 
-// Função para medir o tempo de execução
+// Função para calcular a diferença de tempo em microssegundos
+long double difTempo(struct timespec fim, struct timespec inicio){
+    return (fim.tv_sec - inicio.tv_sec) * 1000000.0 + (fim.tv_nsec - inicio.tv_nsec) / 1000.0;
+}
+
+// Função para medir o tempo de execução (funções com 2 parâmetros)
+// Função para medir o tempo de execução (funções com 2 parâmetros)
 double medirTempo(void (*func)(Registro*, int), Registro *vetor, int n) {
-    clock_t inicio, fim;
-    inicio = clock();
-    func(vetor, n);
-    fim = clock();
-    return ((double)(fim - inicio)) / CLOCKS_PER_SEC;
+     clock_t inicio = clock();
+     func(vetor, n);
+     clock_t fim = clock();
+     return ((double)(fim - inicio)) / CLOCKS_PER_SEC * 1000000.0; // Retorna em microssegundos
 }
 
+// Função para medir o tempo de execução (funções com 3 parâmetros)
 double medirTempo3Param(void (*func)(Registro*, int, int), Registro *vetor, int i, int f) {
-    clock_t inicio, fim;
-    inicio = clock();
-    func(vetor, i, f);
-    fim = clock();
-    return ((double)(fim - inicio)) / CLOCKS_PER_SEC;
+     clock_t inicio = clock();
+     func(vetor, i, f);
+     clock_t fim = clock();
+     return ((double)(fim - inicio)) / CLOCKS_PER_SEC * 1000000.0; //Retorna em microssegundos
 }
 
+// Implementação dos algoritmos de ordenação com contagem de operações
 void insertionSort(Registro *vetor, int n) {
-	for (int i = 1; i < n; i++) {
+    for (int i = 1; i < n; i++) {
         num_movimentacoes++;
-    	Registro key = vetor[i];
-    	int j = i - 1;
-    	// Move elementos do vetor[0..i-1].chave que são maiores que key
-       	// para uma posição à frente da sua posição atual
+        Registro key = vetor[i];
+        int j = i - 1;
         while (j >= 0 && vetor[j].chave > key.chave) {
             num_comparacoes++;
-        	vetor[j + 1] = vetor[j];
+            vetor[j + 1] = vetor[j];
             num_movimentacoes++;
-        	j = j - 1;
-        }	
-        if (j >= 0) num_comparacoes++; // Contabiliza a comparação que faz o while parar
-        
+            j = j - 1;
+        }
+        if (j >= 0) num_comparacoes++;
         vetor[j + 1] = key;
-        num_movimentacoes++;  // Contabiliza a movimentação ao inserir a key
-    }  
+        num_movimentacoes++;
+    }
 }
 
 void selectionSort(Registro *vetor, int n) {
-    int i, j, min_idx; // Um por um, mover o limite do subarray não ordenado 
-	for (i = 0; i < n-1; i++) { // Encontrar o menor elemento no subarray não ordenado 
-        min_idx = i; 
-        for (j = i+1; j < n; j++){
-            num_comparacoes++;
-            if (vetor[j].chave < vetor[min_idx].chave){
-                min_idx = j; // Trocar o menor elemento encontrado com o primeiro elemento 
-            }
-        }
-        // Troca o menor elemento encontrado com o primeiro elemento
-        if (min_idx != i) { // Só troca se min_idx for diferente de i
-            Registro temp = vetor[min_idx];
-            vetor[min_idx] = vetor[i];
-            vetor[i] = temp;
-            num_movimentacoes += 3;  // Incrementa as movimentações (3 atribuições para a troca)
-        }
-	}
+     for (int i = 0; i < n-1; i++) {
+         int min_idx = i;
+         for (int j = i+1; j < n; j++) {
+             num_comparacoes++;
+             if (vetor[j].chave < vetor[min_idx].chave) {
+                 min_idx = j;
+             }
+         }
+         if (min_idx != i) {
+             Registro temp = vetor[min_idx];
+             vetor[min_idx] = vetor[i];
+             vetor[i] = temp;
+             num_movimentacoes += 3; // Contagem correta de movimentações
+         }
+     }
 }
 
 void bubbleSort(Registro *vetor, int n) {
-    int end, i;
-    Registro temp;
-    // end é o último elemento do vetor, o lugar no qual o maior elemento precisa se deslocar
-    for (end = n-1; end > 0; end--) {
-        // a cada ciclo será ajustado a ordenação do par i e i+1
-        bool movimentou = false;
-        for (i = 0; i < end; i++) {
-            // confere se a ordem está errada
-            num_comparacoes++;
-            if (vetor[i].chave > vetor[i+1].chave) {
-                num_movimentacoes += 3;
-                temp = vetor[i];
-                vetor[i] = vetor[i+1];
-                vetor[i+1] = temp;
-                movimentou = true;
-            }
-        }
-        if (!movimentou) {
-            return;
-        }
-    }
+     for (int end = n-1; end > 0; end--) {
+         bool movimentou = false;
+         for (int i = 0; i < end; i++) {
+             num_comparacoes++;
+             if (vetor[i].chave > vetor[i+1].chave) {
+                 Registro temp = vetor[i];
+                 vetor[i] = vetor[i+1];
+                 vetor[i+1] = temp;
+                 movimentou = true;
+                 num_movimentacoes += 3; // Contagem correta de movimentações
+             }
+         }
+         if (!movimentou) return;
+     }
 }
 
 void shellSort(Registro *vetor, int n) {
-    int i, j, h, key;
-    for (h = 1; h < n; h = 3*h+1); //valor máximo de h
-    while (h > 0) {
-        h = (h-1)/3;
-        for (j = h; j < n; j++) {
-            num_movimentacoes++;
-            Registro key = vetor[j];
-            i = j;
-            while (i >= h) {
-                num_comparacoes++;
-                if (vetor[i - h].chave > key.chave) {
-                    num_movimentacoes++;
-                    vetor[i] = vetor[i - h];
-                    i = i - h;
-                }
-                else {
-                    break;
-                }
-            }
-            num_movimentacoes++;
-            vetor[i] = key;
-        }
-    }  
+     int h;
+     for (h = 1; h < n; h = 3*h+1);
+     while (h > 0) {
+         h = (h-1)/3;
+         for (int j = h; j < n; j++) {
+             num_movimentacoes++;
+             Registro key = vetor[j];
+             int i = j;
+             while (i >= h && vetor[i - h].chave > key.chave) {
+                 num_comparacoes++; // Contagem correta de comparações
+                 vetor[i] = vetor[i - h];
+                 num_movimentacoes++;
+                 i = i - h;
+             }
+             if (i >= h) num_comparacoes++; // Contagem adicional para a última comparação
+             vetor[i] = key;
+             num_movimentacoes++;
+         }
+     }
 }
 
 void mergeSort(Registro *vetor, int i, int f) {
-    int m = (i + f)/2;
     if (i < f) {
+        int m = (i + f)/2;
         mergeSort(vetor, i, m);
         mergeSort(vetor, m+1, f);
-        int v1, v2, tamanho, i, j, k;
-        Registro* temp;
-        int fim1 = 0, fim2 = 0;
-        tamanho = f-i+1;
-        v1 = i;
-        v2 = m+1;
-        temp = (Registro*) malloc(tamanho*sizeof(Registro));
-        if (temp != NULL) {
-            for (i = 0; i < tamanho; i++) {
-                if (!fim1 && !fim2) {
-                    if (vetor[v1].chave < vetor[v2].chave) {
-                        temp[i] = vetor[v1];
-                        v1++;
-                    }
-                    else{
-                        temp[i] = vetor[v2];
-                        v2++;
-                    }
-                    if (v1 > m) fim1 = 1;
-                    if (v2 > f) fim2 = 1;
-                }
-                else {
-                    if (!fim1) {
-                        temp[i] = vetor[v1];
-                        v1++;
-                    }
-                    else {
-                        temp[i] = vetor[v2];
-                        v2++;                        
-                    }
-                }
-            }
-            for (j = 0, k = i; j < tamanho; j++, k++) {
-                vetor[k] = temp[j];
-            }
-            free(temp);
-        }
-    }
+        
+        int v1 = i, v2 = m+1;
+        int tamanho = f - i + 1;
+        Registro *temp = malloc(tamanho * sizeof(Registro));
+        int k = 0;
 
+        while (v1 <= m && v2 <= f) {
+            num_comparacoes++;
+            if (vetor[v1].chave <= vetor[v2].chave) {
+                temp[k++] = vetor[v1++];
+                num_movimentacoes++;
+            } else {
+                temp[k++] = vetor[v2++];
+                num_movimentacoes++;
+            }
+        }
+        while (v1 <= m) {
+            temp[k++] = vetor[v1++];
+            num_movimentacoes++;
+        }
+        while (v2 <= f) {
+            temp[k++] = vetor[v2++];
+            num_movimentacoes++;
+        }
+        for (k = 0; k < tamanho; k++) {
+            vetor[i + k] = temp[k];
+            num_movimentacoes++;
+        }
+        free(temp);
+    }
 }
 
 void refazHeapMaximo (Registro *vetor, int i, int n) {
-    int l;
-    int r;
-    if (i == 0) {
-        l = 1;
-        r = 2;
-    } else {
-        l = 2*i;
-        r = (2*i)+1;
-    }
-    int maior;
+    int l = 2*i + 1;
+    int r = 2*i + 2;
+    int maior = i;
     num_comparacoes++;
-    if (l <= n && vetor[l].chave > vetor[i].chave) {
-        maior = l;
-    } else {
-        maior = i;
-    }
+    if (l < n && vetor[l].chave > vetor[maior].chave) maior = l;
     num_comparacoes++;
-    if (r <= n && vetor[r].chave > vetor[maior].chave) {
-        maior = r; 
-    }
+    if (r < n && vetor[r].chave > vetor[maior].chave) maior = r;
     if (maior != i) {
+        Registro temp = vetor[i];
+        vetor[i] = vetor[maior];
+        vetor[maior] = temp;
         num_movimentacoes += 3;
-        Registro temp = vetor[maior];
-        vetor[maior] = vetor[i];
-        vetor[i] = temp;
         refazHeapMaximo(vetor, maior, n);
     }
 }
+
 void heapSort(Registro *vetor, int n) {
-    int tamanho = n;
-    for (int i = n/2; i > 0; i--) {
-        refazHeapMaximo (vetor, i, n);
-    }
-    for (int i = n; i < 1; i--) {
+    for (int i = n/2 - 1; i >= 0; i--) refazHeapMaximo(vetor, i, n);
+    for (int i = n - 1; i > 0; i--) {
+        Registro temp = vetor[0];
+        vetor[0] = vetor[i];
+        vetor[i] = temp;
         num_movimentacoes += 3;
-        Registro temp = vetor[i];
-        vetor[i] = vetor[0];
-        vetor[0] = temp;
-        tamanho--; 
-        refazHeapMaximo(vetor, n-tamanho, tamanho);
+        refazHeapMaximo(vetor, 0, i);
     }
 }
 
 int particao(Registro *vetor, int p, int r) {
     int x = vetor[r].chave;
-    int i = p-1;
-    Registro temp;
-    for (int j = p; p < r; p++) {
+    int i = p - 1;
+    for (int j = p; j < r; j++) {
         num_comparacoes++;
         if (vetor[j].chave <= x) {
             i++;
-            num_movimentacoes += 3;
-            temp = vetor[i];
+            Registro temp = vetor[i];
             vetor[i] = vetor[j];
-            vetor[j] = temp; 
+            vetor[j] = temp;
+            num_movimentacoes += 3;
         }
     }
-    num_movimentacoes += 3;
-    temp = vetor[i+1];
-    vetor[i+1] = vetor[r];
+    Registro temp = vetor[i + 1];
+    vetor[i + 1] = vetor[r];
     vetor[r] = temp;
-    return i+1;
-}
-int particaoAleatoria(Registro *vetor, int p, int r) {
-    int deslocamento, i;
-    Registro temp;
-    time_t t;
-    /* Inicializa gerador de número aleatorio */
-    srand((unsigned) time(&t));
-    // Escolhe um numero aleatorio entre p e r
-    deslocamento = rand() % (r-p+1); //retorna um int entre 0 e (r-p)
-    i = p + deslocamento; // i eh tal que p <= i <= r
-    // Troca de posicao A[i] e A[r]
     num_movimentacoes += 3;
-    temp = vetor[r];
-    vetor[r] = vetor[i];
-    vetor[i] = temp;
-    return particao(vetor, p, r);
+    return i + 1;
 }
+
 void quickSort(Registro *vetor, int p, int r) {
     if (p < r) {
-        int q = particaoAleatoria(vetor, p, r);
-        quickSort(vetor, p, q-1);
-        quickSort(vetor, q+1, r);
+        int q = particao(vetor, p, r);
+        quickSort(vetor, p, q - 1);
+        quickSort(vetor, q + 1, r);
     }
 }
 
@@ -268,109 +216,69 @@ Registro* carregarDados(const char *nome_arquivo, int *n, int tamanho_campo) {
         perror("Erro ao abrir arquivo");
         exit(1);
     }
-
     fscanf(arquivo, "%d", n);
-    Registro *vetor = (Registro*) malloc((*n) * sizeof(Registro));
-
+    Registro *vetor = malloc((*n) * sizeof(Registro));
     for (int i = 0; i < *n; i++) {
         fscanf(arquivo, "%d", &vetor[i].chave);
-        vetor[i].campoDaEstrutura = (int*) malloc(tamanho_campo * sizeof(int));
-        // campoDaEstrutura não precisa ser inicializado, conforme especificado
+        vetor[i].campoDaEstrutura = malloc(tamanho_campo * sizeof(int));
     }
-
     fclose(arquivo);
     return vetor;
 }
 
-// Função para liberar memória alocada dinamicamente no vetor de Registros
+// Função para liberar memória alocada dinamicamente
 void liberarDados(Registro *vetor, int n) {
-    for (int i = 0; i < n; i++) {
-        free(vetor[i].campoDaEstrutura); // Libera cada campoDaEstrutura
-    }
-    free(vetor); // Libera o vetor principal
+    for (int i = 0; i < n; i++) free(vetor[i].campoDaEstrutura);
+    free(vetor);
 }
 
 // Função principal para testar os algoritmos
 int main() {
     const char *arquivos[] = {
-        "100_aleatorio.txt",
-        "100_crescente.txt",
-        "100_decrescente.txt",
-        "1000_aleatorio.txt",
-        "1000_crescente.txt",
-        "1000_decrescente.txt",
-        "10000_aleatorio.txt",
-        "10000_crescente.txt",
-        "10000_decrescente.txt"
+        "100_aleatorio.txt", "100_crescente.txt", "100_decrescente.txt",
+        "1000_aleatorio.txt", "1000_crescente.txt", "1000_decrescente.txt",
+        "10000_aleatorio.txt", "10000_crescente.txt", "10000_decrescente.txt"
     };
     int tamanhos[] = {1, 1000};
+    int n;
+    Registro *vetor;
 
-    // Loop pelos arquivos de entrada
-    for (int i = 0; i < 9; i++) {
-        printf("ENTRADA: %s", arquivos[i]);
-        for (int j = 0; j < 2; j++) { // Tamanhos de campoDaEstrutura
-            int n;
-            // Testa cada algoritmo
-            printf("Arquivo: %s, Tamanho do campo: %d\n", arquivos[i], tamanhos[j]);
-            double tempo_execucao;
-
-            // Insertion Sort
-            Registro *vetor = carregarDados(arquivos[i], &n, tamanhos[j]);
-            resetarContadores();
-            tempo_execucao = medirTempo(insertionSort, vetor, n);
-            printf("Insertion Sort - Tempo: %.4fs, Comparacoes: %lld, Movimentacoes: %lld\n",
-                   tempo_execucao, num_comparacoes, num_movimentacoes);
-            liberarDados(vetor, n);
-
-            // Selection Sort
+    for (int i = 0; i < sizeof(arquivos)/sizeof(arquivos[0]); i++) {
+        for (int j = 0; j < 2; j++) { // Para tamanhos 1 e 1000 de campoDaEstrutura
             vetor = carregarDados(arquivos[i], &n, tamanhos[j]);
-            resetarContadores();
-            tempo_execucao = medirTempo(selectionSort, vetor, n);
-            printf("Selection Sort - Tempo: %.4fs, Comparacoes: %lld, Movimentacoes: %lld\n",
-                   tempo_execucao, num_comparacoes, num_movimentacoes);
-            liberarDados(vetor, n);
+            printf("\nArquivo: %s, Tamanho do campo: %d\n", arquivos[i], tamanhos[j]);
 
-            // Bubble Sort
-            vetor = carregarDados(arquivos[i], &n, tamanhos[j]);
             resetarContadores();
-            tempo_execucao = medirTempo(bubbleSort, vetor, n);
-            printf("Bubble Sort - Tempo: %.4fs, Comparacoes: %lld, Movimentacoes: %lld\n",
-                   tempo_execucao, num_comparacoes, num_movimentacoes);
-            liberarDados(vetor, n);
+            double tempo = medirTempo(insertionSort, vetor, n);
+            printf("Insertion Sort -> Tempo: %.2f µs, Comparacoes: %lld, Movimentacoes: %lld\n", tempo, num_comparacoes, num_movimentacoes);
 
-            // Shell Sort
-            vetor = carregarDados(arquivos[i], &n, tamanhos[j]);
             resetarContadores();
-            tempo_execucao = medirTempo(shellSort, vetor, n);
-            printf("Shell Sort - Tempo: %.4fs, Comparacoes: %lld, Movimentacoes: %lld\n",
-                   tempo_execucao, num_comparacoes, num_movimentacoes);
-            liberarDados(vetor, n);
+            tempo = medirTempo(selectionSort, vetor, n);
+            printf("Selection Sort -> Tempo: %.2f µs, Comparacoes: %lld, Movimentacoes: %lld\n", tempo, num_comparacoes, num_movimentacoes);
 
-            // Merge Sort
-            vetor = carregarDados(arquivos[i], &n, tamanhos[j]);
             resetarContadores();
-            tempo_execucao = medirTempo3Param(mergeSort, vetor, 0, n-1);
-            printf("Merge Sort - Tempo: %.4fs, Comparacoes: %lld, Movimentacoes: %lld\n",
-                   tempo_execucao, num_comparacoes, num_movimentacoes);
-            liberarDados(vetor, n);
+            tempo = medirTempo(bubbleSort, vetor, n);
+            printf("Bubble Sort -> Tempo: %.2f µs, Comparacoes: %lld, Movimentacoes: %lld\n", tempo, num_comparacoes, num_movimentacoes);
 
-            // Heap Sort
-            vetor = carregarDados(arquivos[i], &n, tamanhos[j]);
             resetarContadores();
-            tempo_execucao = medirTempo(heapSort, vetor, n);
-            printf("Heap Sort - Tempo: %.4fs, Comparacoes: %lld, Movimentacoes: %lld\n",
-                   tempo_execucao, num_comparacoes, num_movimentacoes);
-            liberarDados(vetor, n);
+            tempo = medirTempo(shellSort, vetor, n);
+            printf("Shell Sort -> Tempo: %.2f µs, Comparacoes: %lld, Movimentacoes: %lld\n", tempo, num_comparacoes, num_movimentacoes);
 
-            // Quick Sort
-            vetor = carregarDados(arquivos[i], &n, tamanhos[j]);
             resetarContadores();
-            tempo_execucao = medirTempo3Param(quickSort, vetor, 0, n-1);
-            printf("Quick Sort - Tempo: %.4fs, Comparacoes: %lld, Movimentacoes: %lld\n",
-                   tempo_execucao, num_comparacoes, num_movimentacoes);
+            tempo = medirTempo3Param(mergeSort, vetor, 0, n-1);
+            printf("Merge Sort -> Tempo: %.2f µs, Comparacoes: %lld, Movimentacoes: %lld\n", tempo, num_comparacoes, num_movimentacoes);
+
+            resetarContadores();
+            tempo = medirTempo(heapSort, vetor, n);
+            printf("Heap Sort -> Tempo: %.2f µs, Comparacoes: %lld, Movimentacoes: %lld\n", tempo, num_comparacoes, num_movimentacoes);
+
+            resetarContadores();
+            tempo = medirTempo3Param(quickSort, vetor, 0, n-1);
+            printf("Quick Sort -> Tempo: %.2f µs, Comparacoes: %lld, Movimentacoes: %lld\n", tempo, num_comparacoes, num_movimentacoes);
+
             liberarDados(vetor, n);
         }
     }
-
     return 0;
+
 }
