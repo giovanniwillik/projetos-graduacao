@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <stdbool.h>
+#include <math.h>
 
 // Estrutura Registro com alocação dinâmica para campoDaEstrutura
 typedef struct {
@@ -19,26 +20,31 @@ void resetarContadores() {
     num_movimentacoes = 0;
 }
 
-// Função para calcular a diferença de tempo em microssegundos
 long double difTempo(struct timespec fim, struct timespec inicio){
-    return (fim.tv_sec - inicio.tv_sec) * 1000000.0 + (fim.tv_nsec - inicio.tv_nsec) / 1000.0;
+	long double Ttest = ((fim.tv_nsec) - (inicio.tv_nsec)) / pow(10,9);
+	long double execSec = (fim.tv_sec) - (inicio.tv_sec) + Ttest;
+	long double execNsec = execSec * pow(10,9);
+	return execNsec;
 }
 
 // Função para medir o tempo de execução (funções com 2 parâmetros)
-// Função para medir o tempo de execução (funções com 2 parâmetros)
 double medirTempo(void (*func)(Registro*, int), Registro *vetor, int n) {
-     clock_t inicio = clock();
-     func(vetor, n);
-     clock_t fim = clock();
-     return ((double)(fim - inicio)) / CLOCKS_PER_SEC * 1000000.0; // Retorna em microssegundos
+	struct timespec inicio;
+	clock_gettime(CLOCK_MONOTONIC, &inicio);
+	func(vetor, n);
+	struct timespec fim;
+	clock_gettime(CLOCK_MONOTONIC, &fim);
+    return difTempo(fim, inicio);
 }
 
 // Função para medir o tempo de execução (funções com 3 parâmetros)
 double medirTempo3Param(void (*func)(Registro*, int, int), Registro *vetor, int i, int f) {
-     clock_t inicio = clock();
-     func(vetor, i, f);
-     clock_t fim = clock();
-     return ((double)(fim - inicio)) / CLOCKS_PER_SEC * 1000000.0; //Retorna em microssegundos
+	struct timespec inicio;
+	clock_gettime(CLOCK_MONOTONIC, &inicio);
+	func(vetor, i, f);
+	struct timespec fim;
+	clock_gettime(CLOCK_MONOTONIC, &fim);
+    return difTempo(fim, inicio);
 }
 
 // Implementação dos algoritmos de ordenação com contagem de operações
@@ -235,46 +241,52 @@ void liberarDados(Registro *vetor, int n) {
 // Função principal para testar os algoritmos
 int main() {
     const char *arquivos[] = {
-        "100_aleatorio.txt", "100_crescente.txt", "100_decrescente.txt",
-        "1000_aleatorio.txt", "1000_crescente.txt", "1000_decrescente.txt",
-        "10000_aleatorio.txt", "10000_crescente.txt", "10000_decrescente.txt"
+        "C:/Users/giova/OneDrive/Documentos/Computacao/projetos-graduacao/Projetos_Graduacao/ComparacaoAlgoritmosOrdenacao/100_aleatorio.txt", 
+        "C:/Users/giova/OneDrive/Documentos/Computacao/projetos-graduacao/Projetos_Graduacao/ComparacaoAlgoritmosOrdenacao/100_crescente.txt", 
+        "C:/Users/giova/OneDrive/Documentos/Computacao/projetos-graduacao/Projetos_Graduacao/ComparacaoAlgoritmosOrdenacao/100_decrescente.txt",
+        "C:/Users/giova/OneDrive/Documentos/Computacao/projetos-graduacao/Projetos_Graduacao/ComparacaoAlgoritmosOrdenacao/1000_aleatorio.txt", 
+        "C:/Users/giova/OneDrive/Documentos/Computacao/projetos-graduacao/Projetos_Graduacao/ComparacaoAlgoritmosOrdenacao/1000_crescente.txt", 
+        "C:/Users/giova/OneDrive/Documentos/Computacao/projetos-graduacao/Projetos_Graduacao/ComparacaoAlgoritmosOrdenacao/1000_decrescente.txt",
+        "C:/Users/giova/OneDrive/Documentos/Computacao/projetos-graduacao/Projetos_Graduacao/ComparacaoAlgoritmosOrdenacao/10000_aleatorio.txt", 
+        "C:/Users/giova/OneDrive/Documentos/Computacao/projetos-graduacao/Projetos_Graduacao/ComparacaoAlgoritmosOrdenacao/10000_crescente.txt", 
+        "C:/Users/giova/OneDrive/Documentos/Computacao/projetos-graduacao/Projetos_Graduacao/ComparacaoAlgoritmosOrdenacao/10000_decrescente.txt"
     };
     int tamanhos[] = {1, 1000};
     int n;
     Registro *vetor;
 
-    for (int i = 0; i < sizeof(arquivos)/sizeof(arquivos[0]); i++) {
+    for (int i = 0; i < 9; i++) {
         for (int j = 0; j < 2; j++) { // Para tamanhos 1 e 1000 de campoDaEstrutura
             vetor = carregarDados(arquivos[i], &n, tamanhos[j]);
             printf("\nArquivo: %s, Tamanho do campo: %d\n", arquivos[i], tamanhos[j]);
 
             resetarContadores();
             double tempo = medirTempo(insertionSort, vetor, n);
-            printf("Insertion Sort -> Tempo: %.2f µs, Comparacoes: %lld, Movimentacoes: %lld\n", tempo, num_comparacoes, num_movimentacoes);
+            printf("Insertion Sort -> Tempo: %.2f ns, Comparacoes: %lld, Movimentacoes: %lld\n", tempo, num_comparacoes, num_movimentacoes);
 
             resetarContadores();
             tempo = medirTempo(selectionSort, vetor, n);
-            printf("Selection Sort -> Tempo: %.2f µs, Comparacoes: %lld, Movimentacoes: %lld\n", tempo, num_comparacoes, num_movimentacoes);
+            printf("Selection Sort -> Tempo: %.2f ns, Comparacoes: %lld, Movimentacoes: %lld\n", tempo, num_comparacoes, num_movimentacoes);
 
             resetarContadores();
             tempo = medirTempo(bubbleSort, vetor, n);
-            printf("Bubble Sort -> Tempo: %.2f µs, Comparacoes: %lld, Movimentacoes: %lld\n", tempo, num_comparacoes, num_movimentacoes);
+            printf("Bubble Sort -> Tempo: %.2f ns, Comparacoes: %lld, Movimentacoes: %lld\n", tempo, num_comparacoes, num_movimentacoes);
 
             resetarContadores();
             tempo = medirTempo(shellSort, vetor, n);
-            printf("Shell Sort -> Tempo: %.2f µs, Comparacoes: %lld, Movimentacoes: %lld\n", tempo, num_comparacoes, num_movimentacoes);
+            printf("Shell Sort -> Tempo: %.2f ns, Comparacoes: %lld, Movimentacoes: %lld\n", tempo, num_comparacoes, num_movimentacoes);
 
             resetarContadores();
             tempo = medirTempo3Param(mergeSort, vetor, 0, n-1);
-            printf("Merge Sort -> Tempo: %.2f µs, Comparacoes: %lld, Movimentacoes: %lld\n", tempo, num_comparacoes, num_movimentacoes);
+            printf("Merge Sort -> Tempo: %.2f ns, Comparacoes: %lld, Movimentacoes: %lld\n", tempo, num_comparacoes, num_movimentacoes);
 
             resetarContadores();
             tempo = medirTempo(heapSort, vetor, n);
-            printf("Heap Sort -> Tempo: %.2f µs, Comparacoes: %lld, Movimentacoes: %lld\n", tempo, num_comparacoes, num_movimentacoes);
+            printf("Heap Sort -> Tempo: %.2f ns, Comparacoes: %lld, Movimentacoes: %lld\n", tempo, num_comparacoes, num_movimentacoes);
 
             resetarContadores();
             tempo = medirTempo3Param(quickSort, vetor, 0, n-1);
-            printf("Quick Sort -> Tempo: %.2f µs, Comparacoes: %lld, Movimentacoes: %lld\n", tempo, num_comparacoes, num_movimentacoes);
+            printf("Quick Sort -> Tempo: %.2f ns, Comparacoes: %lld, Movimentacoes: %lld\n", tempo, num_comparacoes, num_movimentacoes);
 
             liberarDados(vetor, n);
         }
