@@ -253,42 +253,54 @@ int main() {
     };
     int tamanhos[] = {1, 1000};
     int n;
-    Registro *vetor;
+    Registro *vetorInsertion, *vetorSelection, *vetorBubble, *vetorShell, *vetorMerge, *vetorHeap, *vetorQuick;
 
     for (int i = 0; i < 9; i++) {
         for (int j = 0; j < 2; j++) { // Para tamanhos 1 e 1000 de campoDaEstrutura
-            vetor = carregarDados(arquivos[i], &n, tamanhos[j]);
             printf("\nArquivo: %s, Tamanho do campo: %d\n", arquivos[i], tamanhos[j]);
 
+            vetorInsertion = carregarDados(arquivos[i], &n, tamanhos[j]);
             resetarContadores();
-            double tempo = medirTempo(insertionSort, vetor, n);
+            double tempo = medirTempo(insertionSort, vetorInsertion, n);
             printf("Insertion Sort -> Tempo: %.2f ns, Comparacoes: %lld, Movimentacoes: %lld\n", tempo, num_comparacoes, num_movimentacoes);
 
+            vetorSelection = carregarDados(arquivos[i], &n, tamanhos[j]);
             resetarContadores();
-            tempo = medirTempo(selectionSort, vetor, n);
+            tempo = medirTempo(selectionSort, vetorSelection, n);
             printf("Selection Sort -> Tempo: %.2f ns, Comparacoes: %lld, Movimentacoes: %lld\n", tempo, num_comparacoes, num_movimentacoes);
 
+            vetorBubble = carregarDados(arquivos[i], &n, tamanhos[j]);
             resetarContadores();
-            tempo = medirTempo(bubbleSort, vetor, n);
+            tempo = medirTempo(bubbleSort, vetorBubble, n);
             printf("Bubble Sort -> Tempo: %.2f ns, Comparacoes: %lld, Movimentacoes: %lld\n", tempo, num_comparacoes, num_movimentacoes);
 
+            vetorShell = carregarDados(arquivos[i], &n, tamanhos[j]);
             resetarContadores();
-            tempo = medirTempo(shellSort, vetor, n);
+            tempo = medirTempo(shellSort, vetorShell, n);
             printf("Shell Sort -> Tempo: %.2f ns, Comparacoes: %lld, Movimentacoes: %lld\n", tempo, num_comparacoes, num_movimentacoes);
 
+            vetorMerge = carregarDados(arquivos[i], &n, tamanhos[j]);
             resetarContadores();
-            tempo = medirTempo3Param(mergeSort, vetor, 0, n-1);
+            tempo = medirTempo3Param(mergeSort, vetorMerge, 0, n-1);
             printf("Merge Sort -> Tempo: %.2f ns, Comparacoes: %lld, Movimentacoes: %lld\n", tempo, num_comparacoes, num_movimentacoes);
 
+            vetorHeap = carregarDados(arquivos[i], &n, tamanhos[j]);
             resetarContadores();
-            tempo = medirTempo(heapSort, vetor, n);
+            tempo = medirTempo(heapSort, vetorHeap, n);
             printf("Heap Sort -> Tempo: %.2f ns, Comparacoes: %lld, Movimentacoes: %lld\n", tempo, num_comparacoes, num_movimentacoes);
 
+            vetorQuick = carregarDados(arquivos[i], &n, tamanhos[j]);
             resetarContadores();
-            tempo = medirTempo3Param(quickSort, vetor, 0, n-1);
+            tempo = medirTempo3Param(quickSort, vetorQuick, 0, n-1);
             printf("Quick Sort -> Tempo: %.2f ns, Comparacoes: %lld, Movimentacoes: %lld\n", tempo, num_comparacoes, num_movimentacoes);
 
-            liberarDados(vetor, n);
+            liberarDados(vetorInsertion, n);
+            liberarDados(vetorSelection, n);
+            liberarDados(vetorBubble, n);
+            liberarDados(vetorShell, n);
+            liberarDados(vetorMerge, n);
+            liberarDados(vetorHeap, n);
+            liberarDados(vetorQuick, n);
         }
     }
     return 0;
