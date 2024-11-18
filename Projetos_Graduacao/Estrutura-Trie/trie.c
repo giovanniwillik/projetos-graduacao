@@ -180,12 +180,11 @@ int buscarPalavra(PONT raiz, char* palavra, int n) {
   	for (nivel = 0; nivel < n; nivel++) {
 		i = mapearLetraAtual(palavra[nivel]);
 		if (!p->filhos[i]) {
-			resposta = p->contador;
+			return 0; // Palavra não encontrada, retorno imediato
 		}
 		p = p->filhos[i];
 	}
-	resposta = p->contador;
- 	return resposta;
+	return p->contador; // Retorna o contador no nó final
 }
 
 
@@ -204,15 +203,40 @@ void inserir(PONT raiz, char* palavra, int n) {
   	PONT p = raiz;
   	for (nivel = 0; nivel < n; nivel++) {
 		i = mapearLetraAtual(palavra[nivel]);
+		if (!p->filhos) {
+			p->filhos = (PONT*)malloc(sizeof(PONT) * LETRAS);
+			for (int j = 0; j < LETRAS; j++) p->filhos[j] = NULL;
+		}
 		if (!p->filhos[i]) {
-			p->filhos[i] =criarNo();
+			p->filhos[i] = criarNo();
 		}
 		p = p->filhos[i];
 	}
 	p->contador++;
 }
 
+void exclusaoSemFilho(PONT p, PONT* q, int* ai, int nivel, int i) {
+    if (p) {
+        free(p); // Libera o nó p
+        q[nivel]->filhos[i] = NULL; // Remove a referência ao nó liberado
 
+        // Verifica se o nó pai tem outros filhos
+        for (int j = 0; j < LETRAS; j++) {
+            if (q[nivel]->filhos[j] != NULL) {
+                return; // Se ainda há filhos, encerra a função (nó pai ainda tem filhos)
+            }
+        }
+
+        // Se não há outros filhos, libera o arranjo de filhos
+        free(q[nivel]->filhos);
+        q[nivel]->filhos = NULL;
+
+        // Se o nó pai não é um fim de palavra, continue a exclusão recursiva
+        if (q[nivel]->contador == 0 && nivel > 0) {
+            exclusaoSemFilho(q[nivel], q, ai, nivel - 1, ai[nivel - 1]);
+        }
+    }
+}
 
 /*
 Funcao que recebe o endereco do no raiz de uma trie (raiz), o endereco de um arranjo de caracteres (palavra) e o tamanho da palavra presente no arranjo de caracteres (n) e exclui todas as copias dessa palavra da trie. Provavelmente voce desejara realizar a exclusao chamando uma funcao auxiliar recursiva (desenvolvida por voce) que tenha, ao menos, um parametro adicional para indicar qual a letra atual da chamada recursiva (assumindo que cada chamada recursiva avancara uma letra na arvore). Adicionalmente, se a operacao de exclusao resultar na eliminacao de um no, pode ser necessario, recursivamente, apagar alguns dos nos anteriores, neste caso, voce pode precisar de mais um parametro adicional na sua funcao auxiliar recursiva ou ela pode ter um retorno (potencialmente booleano) para indicar que e necessario excluir nos na volta da chamada recursiva. Voce pode assumir que todos os parametros desta funcao terao valores validos e a palavra a ser excluida (presente no arranjo de caracteres) possuira apenas letras minusculas (sem acentos ou caracteres especiais). E possivel que a palavra nao exista na sua trie, entao a funcao de exclusao nao causara nenhuma mudanca na trie. A exclusao funciona da seguinte forma (potencialmente recursiva):
@@ -225,9 +249,34 @@ Funcao que recebe o endereco do no raiz de uma trie (raiz), o endereco de um arr
 Observacao: o no raiz nunca devera ser excluido, porem seu arranjo de filhos podera ser excluido caso este no nao possua filhos (trie sem nenhuma palavra) e, neste caso, seu campo filhos devera ser atualizado para NULL.
 */
 void excluirTodas(PONT raiz, char* palavra, int n) {
+    int nivel;
+    int i;
+    PONT p = raiz;
+    PONT q[n];  // Para armazenar nós percorridos
+    int ai[n];  // Para armazenar índices de cada nível
 
-  /* Complete o codigo desta funcao */ 
+    // Traverse through the trie following the given word
+    for (nivel = 0; nivel < n; nivel++) {
+        i = mapearLetraAtual(palavra[nivel]);
+        if (!p->filhos || !p->filhos[i]) return; // Se o caminho não é encontrado, encerra
+        ai[nivel] = i;
+        q[nivel] = p;
+        p = p->filhos[i];
+    }
+    
+    // Verifica se a palavra existe
+    if (p->contador == 0) return;
 
+    // Se a palavra existe, zera o contador
+    p->contador = 0;
+
+    // Se o nó tem filhos, apenas zera o contador
+    if (p->filhos != NULL) {
+        return;
+    }
+
+    // Se o nó não tem filhos, inicie o processo de exclusão
+    exclusaoSemFilho(p, q, ai, nivel - 1, ai[nivel - 1]);
 }
 
 
@@ -236,9 +285,31 @@ void excluirTodas(PONT raiz, char* palavra, int n) {
 Funcao que recebe o endereco do no raiz de uma trie (raiz), o endereco de um arranjo de caracteres (palavra) e o tamanho da palavra presente no arranjo de caracteres (n) e exclui uma copia dessa palavra da trie (isto e, caso a palavra exista na trie, diminui o contador correspondente a sua ultima letra em uma unidade). Observacoes: se a palavra nao existir na trie, nao ha nada a ser feito pela funcao; se a palavra existir e o contador valer 1 (um) antes da exclusao, entao a exclusao tera o mesmo comportamento da funcao excluirTodas.
 */
 void excluir(PONT raiz, char* palavra, int n) {
+    int nivel;
+    int i;
+    PONT p = raiz;
+    PONT q[n];  // Para armazenar nós percorridos
+    int ai[n];  // Para armazenar índices de cada nível
 
-  /* Complete o codigo desta funcao */ 
-
+    for (nivel = 0; nivel < n; nivel++) {
+        i = mapearLetraAtual(palavra[nivel]);
+        if (!p->filhos || !p->filhos[i]) return; // A palavra não está na trie
+        ai[nivel] = i;
+        q[nivel] = p;
+        p = p->filhos[i];
+    }
+    
+    if (p->contador == 0) return; // Se a palavra não existe
+    if (p->contador > 1) {
+        p->contador--; // Diminui o contador
+    } else {
+        if (!p->filhos) { // Excluir se não há filhos
+            exclusaoSemFilho(p, q, ai, nivel - 1, ai[nivel - 1]); // Corrigido: passar o nível correto
+        }
+        else {
+            p->contador = 0; // Apenas zera o contador se ainda tem filhos
+        }
+    }
 }
 
 
