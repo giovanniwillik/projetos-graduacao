@@ -4,7 +4,7 @@
 /**								 **/
 /**   Segundo Exercicio-Programa				    **/
 /**								 **/
-/**   <nome do(a) aluno(a)>		  <numero USP>   <turma> **/
+/**   Giovanni Willik Del Piccolo		  15455979   Turma 02 **/
 /**								 **/
 /*********************************************************************/
 
@@ -165,6 +165,7 @@ void exibir(PONT raiz, char* palavra) {
 	exibirAux(raiz, palavra, 0);
 }
 
+// Função auxiliar para mapear uma letra para seu índice no array de filhos
 int mapearLetraAtual (char c) {
 	return ((int) c - VALOR_a);
 }
@@ -177,14 +178,19 @@ int buscarPalavra(PONT raiz, char* palavra, int n) {
  	int nivel;
   	int i;
   	PONT p = raiz;
+
+	// Percorre a trie seguindo os caracteres da palavra
   	for (nivel = 0; nivel < n; nivel++) {
 		i = mapearLetraAtual(palavra[nivel]);
+		// Se não há filhos ou o filho correspondente não existe, a palavra não está na trie
 		if (!p->filhos[i]) {
 			return 0; // Palavra não encontrada, retorno imediato
 		}
 		p = p->filhos[i];
 	}
-	return p->contador; // Retorna o contador no nó final
+
+	// Retorna o contador do nó final, que representa o número de ocorrências da palavra
+	return p->contador;
 }
 
 
@@ -201,20 +207,30 @@ void inserir(PONT raiz, char* palavra, int n) {
  	int nivel;
   	int i;
   	PONT p = raiz;
+
+	// Percorre/cria o caminho para a palavra na trie
   	for (nivel = 0; nivel < n; nivel++) {
 		i = mapearLetraAtual(palavra[nivel]);
+
+		// Se o nó atual não tem filhos, cria o array de filhos
 		if (!p->filhos) {
 			p->filhos = (PONT*)malloc(sizeof(PONT) * LETRAS);
 			for (int j = 0; j < LETRAS; j++) p->filhos[j] = NULL;
 		}
+
+		// Se o filho correspondente não existe, cria um novo nó
 		if (!p->filhos[i]) {
 			p->filhos[i] = criarNo();
 		}
+
 		p = p->filhos[i];
 	}
+
+	// Incrementa o contador do nó final
 	p->contador++;
 }
 
+// Função auxiliar para excluir nós sem filhos durante o processo de exclusão
 void exclusaoSemFilho(PONT p, PONT* q, int* ai, int nivel, int i) {
     if (p) {
         free(p); // Libera o nó p
@@ -255,7 +271,7 @@ void excluirTodas(PONT raiz, char* palavra, int n) {
     PONT q[n];  // Para armazenar nós percorridos
     int ai[n];  // Para armazenar índices de cada nível
 
-    // Traverse through the trie following the given word
+    // Percorre a trie seguindo a palavra dada
     for (nivel = 0; nivel < n; nivel++) {
         i = mapearLetraAtual(palavra[nivel]);
         if (!p->filhos || !p->filhos[i]) return; // Se o caminho não é encontrado, encerra
@@ -291,6 +307,7 @@ void excluir(PONT raiz, char* palavra, int n) {
     PONT q[n];  // Para armazenar nós percorridos
     int ai[n];  // Para armazenar índices de cada nível
 
+	// Percorre a trie seguindo a palavra dada
     for (nivel = 0; nivel < n; nivel++) {
         i = mapearLetraAtual(palavra[nivel]);
         if (!p->filhos || !p->filhos[i]) return; // A palavra não está na trie
@@ -300,19 +317,18 @@ void excluir(PONT raiz, char* palavra, int n) {
     }
     
     if (p->contador == 0) return; // Se a palavra não existe
+
     if (p->contador > 1) {
-        p->contador--; // Diminui o contador
+        p->contador--; // Diminui o contador se há mais de uma ocorrência
     } else {
         if (!p->filhos) { // Excluir se não há filhos
-            exclusaoSemFilho(p, q, ai, nivel - 1, ai[nivel - 1]); // Corrigido: passar o nível correto
+            exclusaoSemFilho(p, q, ai, nivel - 1, ai[nivel - 1]);
         }
         else {
             p->contador = 0; // Apenas zera o contador se ainda tem filhos
         }
     }
 }
-
-
 
 
 /*
