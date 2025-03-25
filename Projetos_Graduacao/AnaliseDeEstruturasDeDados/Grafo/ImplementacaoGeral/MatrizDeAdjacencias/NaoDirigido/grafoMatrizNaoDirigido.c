@@ -22,39 +22,31 @@ void inicializarGrafo(Grafo *g, int numVertices)
 }
 
 // Função para verificar a existência de uma aresta
-int existeAresta(Grafo *g, int origem, int destino)
+int existeAresta(Grafo *g, int v1, int v2)
 {
-    return g->matriz[origem][destino];
+    return g->matriz[v1][v2];
 }
 
-// Função para inserir uma aresta
-void inserirAresta(Grafo *g, int origem, int destino)
+// Função para inserir uma aresta (grafo não dirigido)
+void inserirAresta(Grafo *g, int v1, int v2)
 {
-    g->matriz[origem][destino] = 1;
+    g->matriz[v1][v2] = 1;
+    g->matriz[v2][v1] = 1; // Bidirecional
 }
 
 // Função para excluir uma aresta
-void excluirAresta(Grafo *g, int origem, int destino)
+void excluirAresta(Grafo *g, int v1, int v2)
 {
-    g->matriz[origem][destino] = 0;
+    g->matriz[v1][v2] = 0;
+    g->matriz[v2][v1] = 0; // Bidirecional
 }
 
-// Função para obter o grau de saída de um vértice
-int grauSaida(Grafo *g, int vertice)
+// Função para obter o grau de um vértice
+int grauVertice(Grafo *g, int v)
 {
     int grau = 0;
     for (int i = 0; i < g->numVertices; i++)
-        if (g->matriz[vertice][i])
-            grau++;
-    return grau;
-}
-
-// Função para obter o grau de entrada de um vértice
-int grauEntrada(Grafo *g, int vertice)
-{
-    int grau = 0;
-    for (int i = 0; i < g->numVertices; i++)
-        if (g->matriz[i][vertice])
+        if (g->matriz[v][i])
             grau++;
     return grau;
 }
@@ -69,16 +61,16 @@ void copiarGrafo(Grafo *src, Grafo *dest)
 }
 
 // ---------------- BUSCA EM PROFUNDIDADE (DFS) ----------------
-void buscaProfundidade(Grafo *g, int vertice, int visitado[], int *contador, int respostas[], int N)
+void buscaProfundidade(Grafo *g, int v, int visitado[], int *contador, int respostas[], int N)
 {
-    visitado[vertice] = 1;
+    visitado[v] = 1;
     if (*contador < N)
     {
-        respostas[(*contador)++] = vertice;
+        respostas[(*contador)++] = v;
     }
     for (int i = 0; i < g->numVertices; i++)
     {
-        if (g->matriz[vertice][i] && !visitado[i])
+        if (g->matriz[v][i] && !visitado[i])
         {
             buscaProfundidade(g, i, visitado, contador, respostas, N);
         }
@@ -112,32 +104,34 @@ void buscaLargura(Grafo *g, int inicio, int N, int respostas[])
 }
 
 // ---------------- DETECÇÃO DE CICLOS ----------------
-int detectaCicloDFS(Grafo *g, int v, int visitado[], int recStack[])
+int detectaCicloDFS(Grafo *g, int v, int visitado[], int pai)
 {
     visitado[v] = 1;
-    recStack[v] = 1;
 
     for (int i = 0; i < g->numVertices; i++)
     {
         if (g->matriz[v][i])
         {
-            if (!visitado[i] && detectaCicloDFS(g, i, visitado, recStack))
+            if (!visitado[i])
+            {
+                if (detectaCicloDFS(g, i, visitado, v))
+                    return 1;
+            }
+            else if (i != pai)
+            {
                 return 1;
-            else if (recStack[i])
-                return 1;
+            }
         }
     }
-    recStack[v] = 0;
     return 0;
 }
 
 int detectarCiclo(Grafo *g)
 {
     int visitado[MAX_VERTICES] = {0};
-    int recStack[MAX_VERTICES] = {0};
 
     for (int i = 0; i < g->numVertices; i++)
-        if (!visitado[i] && detectaCicloDFS(g, i, visitado, recStack))
+        if (!visitado[i] && detectaCicloDFS(g, i, visitado, -1))
             return 1;
     return 0;
 }
@@ -164,13 +158,96 @@ void encontrarComunidades(Grafo *g)
 // ---------------- EXIBIÇÃO EM RAIO (Melhores caminhos) ----------------
 void exibirRaio(Grafo *g)
 {
-    printf("Funcionalidade em desenvolvimento...\n");
+    for (int i = 0; i < g->numVertices; i++)
+    {
+        printf("Raio de %d: ", i);
+        int visitado[MAX_VERTICES] = {0};
+        int fila[MAX_VERTICES], frente = 0, fim = 0;
+
+        fila[fim++] = i;
+        visitado[i] = 1;
+
+        int nivel = 0;
+        while (frente < fim)
+        {
+            int tam = fim;
+            for (int i = 0; i < tam; i++)
+            {
+                int v = fila[frente++];
+                printf("%d ", v);
+
+                for (int j = 0; j < g->numVertices; j++)
+                {
+                    if (g->matriz[v][j] && !visitado[j])
+                    {
+                        fila[fim++] = j;
+                        visitado[j] = 1;
+                    }
+                }
+            }
+            printf("\n");
+            nivel++;
+        }
+    }
 }
 
 // ---------------- MELHOR CAMINHO ----------------
-void melhorCaminho(Grafo *g, int origem, int destino)
+void mehorCaminho(Grafo *g, int origem, int destino)
 {
-    printf("Funcionalidade em desenvolvimento...\n");
+    int visitado[MAX_VERTICES] = {0};
+    int fila[MAX_VERTICES], frente = 0, fim = 0;
+
+    fila[fim++] = origem;
+    visitado[origem] = 1;
+
+    int via[MAX_VERTICES];
+    for (int i = 0; i < g->numVertices; i++)
+        via[i] = -1;
+    via[origem] = 0;
+
+    while (frente < fim)
+    {
+        int v = fila[frente++];
+
+        for (int i = 0; i < g->numVertices; i++)
+        {
+            if (g->matriz[v][i] && !visitado[i])
+            {
+                fila[fim++] = i;
+                visitado[i] = 1;
+                via[i] = v;
+            }
+        }
+    }
+
+    printf("Melhor caminho de %d até %d:\n", origem, destino);
+    if (via[destino] == -1 && origem != destino)
+    {
+        printf("Não existe caminho de %d até %d.\n", origem, destino);
+    }
+    else
+    {
+        int caminho[MAX_VERTICES], tam = 0;
+        int atual = destino;
+
+        while (atual != 0)
+        {
+            caminho[tam++] = atual;
+            if (atual == origem)
+                break;
+            atual = via[atual];
+        }
+
+        if (caminho[tam - 1] != origem)
+        {
+            printf("Não existe caminho de %d até %d.\n", origem, destino);
+        }
+        else
+        {
+            for (int i = tam - 1; i >= 0; i++)
+                printf("%d", caminho[i]);
+        }
+    }
 }
 
 // ---------------- TESTE ----------------
