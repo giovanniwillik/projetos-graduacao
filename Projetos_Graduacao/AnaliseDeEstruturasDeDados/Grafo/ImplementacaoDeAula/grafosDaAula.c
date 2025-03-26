@@ -357,76 +357,6 @@ void exibirGrafo(VERTICE *g)
     }
 }
 
-// -----------------------------
-// Função principal de testes
-// -----------------------------
-int main()
-{
-    VERTICE g[V + 1];
-    inicializar(g);
-
-    // ----------------------------
-    // Teste 1: Grau, remoção, DFS
-    // ----------------------------
-    /*
-    // Criação de um grafo com ciclo: 1 → 2, 1 → 3, 2 → 4, 3 → 4, 4 → 5, 5 → 1
-    inserirAresta(g, 1, 2);
-    inserirAresta(g, 1, 3);
-    inserirAresta(g, 2, 4);
-    inserirAresta(g, 3, 4);
-    inserirAresta(g, 4, 5);
-    inserirAresta(g, 5, 1);
-
-    printf("Representacao do Grafo:\n");
-    exibirGrafo(g);
-
-    printf("\nTestando grau de saída e entrada:\n");
-    for (int i = 1; i <= V; i++) {
-        printf("Vértice %d - Grau de saída: %d, Grau de entrada: %d\n", i, grauSaida(g, i), grauEntrada(g, i));
-    }
-
-    printf("\nTestando remoção de aresta 1 -> 2:\n");
-    excluirAresta(g, 1, 2);
-    exibirGrafo(g);
-
-    printf("\nTestando busca em profundidade a partir do vértice 1:\n");
-    zerarFlags(g);
-    profundidade(g, 1);
-    for (int i = 1; i <= V; i++) {
-        printf("Vértice %d - Flag: %d\n", i, g[i].flag);
-    }
-    */
-
-    // ----------------------------
-    // Teste 2: BFS e menor caminho
-    // ----------------------------
-
-    inserirAresta(g, 1, 2);
-    inserirAresta(g, 1, 3);
-    inserirAresta(g, 2, 4);
-    inserirAresta(g, 3, 4);
-    inserirAresta(g, 4, 5);
-
-    printf("Grafo:\n");
-    exibirGrafo(g);
-
-    printf("\nBusca em Largura a partir do vértice 1:\n");
-    largura(g, 1);
-    for (int i = 1; i <= V; i++)
-    {
-        printf("Vértice %d: flag = %d\n", i, g[i].flag);
-    }
-
-    printf("\nBusca do Menor Caminho (via BFS) de 1 até 5:\n");
-    buscaMenorCaminho(g, 1, 5);
-    for (int i = 1; i <= V; i++)
-    {
-        printf("Vértice %d veio de %d\n", i, g[i].via);
-    }
-
-    return 0;
-}
-
 // ----------------------------
 // Exercícios básicos em grafos: Lista 1
 // ----------------------------
@@ -519,7 +449,7 @@ void grafoTransposto(VERTICE *g, VERTICE *h) {
 // 5. Escreva um algoritmo que dado um grafo m representado em matriz,
 // retorne o mesmo grafo em listas de adjacências.
 
-void matriParaLista(VERTICE *g, int matriz[V][V]) {
+void matrizParaLista(VERTICE *g, int matriz[V][V]) {
     for (int i = 1; i <= V; i++) {
         for (int j = 1; j <= V; j++) {
             if (matriz[i][j] != 0) {
@@ -532,6 +462,28 @@ void matriParaLista(VERTICE *g, int matriz[V][V]) {
 // 6. Uma árvore enraizada é um grafo acíclico, conexo e dirigido, com um único vértice fonte de onde
 // todas as arestas partem. Escreva um algoritmo que, dado um grafo g, verifique se é uma árvore
 // enraizada ou não, retornando true/false conforme o caso.
+
+bool ehArvoreEnraizada(VERTICE *g) {
+    int raiz = 0;
+    int numVertices = 0;
+    for (int i = 1; i <= V; i++) {
+        if (grauEntrada(g, i) == 0) {
+            raiz = i;
+            numVertices++;
+        }
+    }
+    if (numVertices != 1) {
+        return false;
+    }
+    zerarFlags(g);
+    profundidade(g, raiz);
+    for (int i = 1; i <= V; i++) {
+        if (g[i].flag != 2) {
+            return false;
+        }
+    }
+    return true;
+}
 
 // 7. Seja um grafo g não-dirigido ponderado (com um peso inteiro associado a cada aresta). Escreva um
 // algoritmo que, dado g e um custo mínimo int c, retorne uma cópia de g contendo apenas as arestas
@@ -621,3 +573,75 @@ void matriParaLista(VERTICE *g, int matriz[V][V]) {
 
 // 29. Variação: considere ainda que existe um local n que não deve ser visitado (por exemplo, n pode ser
 // uma área da cidade que foi interditada por alguma razão). Modifique o algoritmo de acordo.
+
+
+
+// -----------------------------
+// Função principal de testes
+// -----------------------------
+int main()
+{
+    VERTICE g[V + 1];
+    inicializar(g);
+
+    // ----------------------------
+    // Teste 1: Grau, remoção, DFS
+    // ----------------------------
+    /*
+    // Criação de um grafo com ciclo: 1 → 2, 1 → 3, 2 → 4, 3 → 4, 4 → 5, 5 → 1
+    inserirAresta(g, 1, 2);
+    inserirAresta(g, 1, 3);
+    inserirAresta(g, 2, 4);
+    inserirAresta(g, 3, 4);
+    inserirAresta(g, 4, 5);
+    inserirAresta(g, 5, 1);
+
+    printf("Representacao do Grafo:\n");
+    exibirGrafo(g);
+
+    printf("\nTestando grau de saída e entrada:\n");
+    for (int i = 1; i <= V; i++) {
+        printf("Vértice %d - Grau de saída: %d, Grau de entrada: %d\n", i, grauSaida(g, i), grauEntrada(g, i));
+    }
+
+    printf("\nTestando remoção de aresta 1 -> 2:\n");
+    excluirAresta(g, 1, 2);
+    exibirGrafo(g);
+
+    printf("\nTestando busca em profundidade a partir do vértice 1:\n");
+    zerarFlags(g);
+    profundidade(g, 1);
+    for (int i = 1; i <= V; i++) {
+        printf("Vértice %d - Flag: %d\n", i, g[i].flag);
+    }
+    */
+
+    // ----------------------------
+    // Teste 2: BFS e menor caminho
+    // ----------------------------
+
+    inserirAresta(g, 1, 2);
+    inserirAresta(g, 1, 3);
+    inserirAresta(g, 2, 4);
+    inserirAresta(g, 3, 4);
+    inserirAresta(g, 4, 5);
+
+    printf("Grafo:\n");
+    exibirGrafo(g);
+
+    printf("\nBusca em Largura a partir do vértice 1:\n");
+    largura(g, 1);
+    for (int i = 1; i <= V; i++)
+    {
+        printf("Vértice %d: flag = %d\n", i, g[i].flag);
+    }
+
+    printf("\nBusca do Menor Caminho (via BFS) de 1 até 5:\n");
+    buscaMenorCaminho(g, 1, 5);
+    for (int i = 1; i <= V; i++)
+    {
+        printf("Vértice %d veio de %d\n", i, g[i].via);
+    }
+
+    return 0;
+}
