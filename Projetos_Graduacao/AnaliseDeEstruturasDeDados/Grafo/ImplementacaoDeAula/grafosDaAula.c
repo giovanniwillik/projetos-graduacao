@@ -92,6 +92,7 @@ typedef struct s
 {
     struct s *prox;
     int adj;
+    int peso; // peso da aresta (opcional)
 } NO;
 
 // Estrutura de vértice: lista de adjacência + flags
@@ -453,7 +454,7 @@ void matrizParaLista(VERTICE *g, int matriz[V][V]) {
     for (int i = 1; i <= V; i++) {
         for (int j = 1; j <= V; j++) {
             if (matriz[i][j] != 0) {
-                inserirAresta(g, i, j);
+                inserirArestaComPeso(g, i, j, matriz[i][j]);
             }
         }
     }
@@ -489,12 +490,64 @@ bool ehArvoreEnraizada(VERTICE *g) {
 // algoritmo que, dado g e um custo mínimo int c, retorne uma cópia de g contendo apenas as arestas
 // de custo maior do que c.
 
+bool inserirArestaComPeso(VERTICE *h, int i, int j, int peso) {
+    NO *ant;
+    NO *atual = arestaExiste(h, i, j, &ant);
+    if (atual)
+        return false; // já existe
+
+    NO *novo = (NO *)malloc(sizeof(NO));
+    novo->adj = j;
+    novo->prox = h[i].inicio;
+    novo->peso = peso;
+    h[i].inicio = novo;
+
+    return true;
+}
+
+void grafoComCustoMaior (VERTICE *g, VERTICE *h, int c) {
+    for (int i = 1; i <= V; i++) {
+        NO *p = g[i].inicio;
+        while (p) {
+            if (p->peso > c) {
+                inserirArestaComPeso(h, i, p->adj, p->peso);
+            }
+        }
+    }
+}
+
 // 8. Sejam dois grafos g1 e g2 contendo exatamente os mesmos vértices. Verifique se g2 é um subgrafo
 // de g1, retornando true/false conforme o caso. Para tornar o problema mais interessante, considere
 // que um grafo é representado em listas e outro em matriz.
 
+bool ehSubgrafo(VERTICE *g1, int matriz[V][V], VERTICE *g2) {
+    matrizParaLista(g2, matriz);
+    for (int i = 1; i <= V; i++) {
+        NO *p = g2[i].inicio;
+        NO *ant = NULL;
+        while (p) {
+            if (!arestaExiste(g1, i, p->adj, &ant)){
+                return false; // aresta não existe em g1
+            }
+        }
+    }
+
+}
+
 // 9. Dados dois grafos g1 e g2, escreva um algoritmo que retorne um grafo g3 cujas arestas estejam
 // presentes em g1 mas não em g2.
+
+void grafoExclusivoDeg1(VERTICE *g1, VERTICE *g2, VERTICE *g3) {
+    for (int i = 1; i <= V; i++) {
+        NO *p = g1[i].inicio;
+        NO *ant = NULL;
+        while (p) {
+            if (!arestaExiste(g2, i, p->adj, &ant)) {
+                inserirArestaComPeso(g3, i, p->adj, p->peso);
+            }
+        }
+    }
+}
 
 // 10. Considere um grafo dirigido em lista de adjacências representando uma rede de troca de emails,
 // onde cada vértice representa um usuário, e cada aresta representa um email enviado. Cada aresta
@@ -503,12 +556,91 @@ bool ehArvoreEnraizada(VERTICE *g) {
 // spam. Escreva um algoritmo para exibir os usuários suspeitos de iniciar a propagação de x. Um
 // usuário é considerado suspeito se ele próprio não recebeu a mensagem x nenhuma vez.
 
+typedef struct s
+{
+    struct s *prox;
+    int adj;
+    int id; 
+} EMAIL;
+
+// Estrutura de vértice: lista de adjacência + flags
+typedef struct
+{
+    EMAIL *inicio; // início da lista de adjacência
+    int flag;   // usado para marcações de busca
+} USUARIO; 
+
+int usuariosSuspeitos (USUARIO *g, int x, int **suspeitos) {
+    int cont = 0;
+    bool *recebeuSpam = (bool *)malloc(sizeof(bool) * (V + 1));
+    for (int i = 1; i <= V; i++) {
+        recebeuSpam[i] = false;
+    }
+    for (int i = 1; i <= V; i++) {
+        EMAIL *p = g[i].inicio;
+        while (p) {
+            if (p->id == x) {
+                recebeuSpam[p->adj] = true;
+            }
+            p = p->prox;
+        }
+    }
+    printf("Usuários suspeitos de iniciar a propagação de %d:\n", x);
+    for (int i = 1; i <= V; i++) {
+        if (!recebeuSpam[i]) {
+            suspeitos[cont] = (int *)malloc(sizeof(int));
+            suspeitos[cont] = i;
+            cont++;
+            printf("%d ", i);
+        }
+    }
+    return cont;
+}
+
 // 11. Considere um grafo dirigido em lista de adjacências representando uma rede de chamadas
 // telefônicas entre diversas unidades de uma empresa, onde cada vértice representa uma unidade, e
 // cada aresta representa uma chamada efetuada. As unidades podem estar em diferentes países,
 // identificados por um campo int país definido no respectivo vértice. Problema: a conta de telefone
 // global da empresa está muito alta. Escreva um algoritmo que identifique a unidade que efetua
 // chamadas para o maior número de países. Havendo empate, retorne qualquer resposta possível.
+
+typedef struct s
+{
+    struct s *prox;
+    int adj;
+} CHAMADA;
+
+// Estrutura de vértice: lista de adjacência + flags
+typedef struct
+{
+    CHAMADA *inicio; // início da lista de adjacência
+    int pais; // país da unidade
+    int flag;   // usado para marcações de busca
+} UNIDADE; 
+
+int unidadeMaiorNumeroDePaises (UNIDADE *g) {
+    int unidadeMaxima = -1;
+    int maior = 0;
+    for (int i = 1; i <= V; i++) {
+        bool paisVisitado[V + 1] = {false};
+        int temp = 0;
+        CHAMADA *p = g[i].inicio;
+
+        while (p) {
+            int paisAdj = g[p->adj].pais;
+            if (paisAdj != g[i].pais && !paisVisitado[paisAdj]) {
+                paisVisitado[paisAdj] = true;
+                temp++;
+            }
+            p = p->prox;
+        }
+        if (temp > maior) {
+            maior = temp;
+            unidadeMaxima = i;
+        }
+    }
+    return unidadeMaxima;
+}
 
 // 12. Seja um grafo g não-dirigido. Escreva uma função para detectar ciclos em g, retornando true/false.
 
