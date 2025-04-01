@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 
-#define V 5 // Número máximo de vértices
+#define V 11 // Número máximo de vértices
 
 // -----------------------------
 // ESTRUTURAS DE FILA (DINÂMICA)
@@ -141,6 +142,22 @@ bool inserirAresta(VERTICE *g, int i, int j)
     novo->adj = j;
     novo->prox = g[i].inicio;
     g[i].inicio = novo;
+
+    return true;
+}
+
+bool inserirArestaComPeso(VERTICE *h, int i, int j, int peso)
+{
+    NO *ant;
+    NO *atual = arestaExiste(h, i, j, &ant);
+    if (atual)
+        return false; // já existe
+
+    NO *novo = (NO *)malloc(sizeof(NO));
+    novo->adj = j;
+    novo->prox = h[i].inicio;
+    novo->peso = peso;
+    h[i].inicio = novo;
 
     return true;
 }
@@ -421,11 +438,14 @@ int removeLacosEncontrados(VERTICE *g)
 
 // 3. Escreva um algoritmo para destruir as arestas de um grafo, tornando-o vazio.
 
-int destroiArestas(VERTICE *g) {
+int destroiArestas(VERTICE *g)
+{
     int arestasDestruidas = 0;
-    for (int i = 0; i <= V; i++) {
+    for (int i = 0; i <= V; i++)
+    {
         NO *p = g[i].inicio;
-        while (p) {
+        while (p)
+        {
             NO *temp = p;
             p = p->prox;
             free(temp);
@@ -437,10 +457,13 @@ int destroiArestas(VERTICE *g) {
 // 4. Seja um grafo g dirigido. Escreva um algoritmo para
 // retornar o grafo transposto de g.
 
-void grafoTransposto(VERTICE *g, VERTICE *h) {
-    for (int i = 0; i <= V; i++) {
+void grafoTransposto(VERTICE *g, VERTICE *h)
+{
+    for (int i = 0; i <= V; i++)
+    {
         NO *p = g[i].inicio;
-        while (p) {
+        while (p)
+        {
             inserirAresta(h, p->adj, i);
             p = p->prox;
         }
@@ -450,10 +473,14 @@ void grafoTransposto(VERTICE *g, VERTICE *h) {
 // 5. Escreva um algoritmo que dado um grafo m representado em matriz,
 // retorne o mesmo grafo em listas de adjacências.
 
-void matrizParaLista(VERTICE *g, int matriz[V][V]) {
-    for (int i = 1; i <= V; i++) {
-        for (int j = 1; j <= V; j++) {
-            if (matriz[i][j] != 0) {
+void matrizParaLista(VERTICE *g, int matriz[V][V])
+{
+    for (int i = 1; i <= V; i++)
+    {
+        for (int j = 1; j <= V; j++)
+        {
+            if (matriz[i][j] != 0)
+            {
                 inserirArestaComPeso(g, i, j, matriz[i][j]);
             }
         }
@@ -464,22 +491,28 @@ void matrizParaLista(VERTICE *g, int matriz[V][V]) {
 // todas as arestas partem. Escreva um algoritmo que, dado um grafo g, verifique se é uma árvore
 // enraizada ou não, retornando true/false conforme o caso.
 
-bool ehArvoreEnraizada(VERTICE *g) {
+bool ehArvoreEnraizada(VERTICE *g)
+{
     int raiz = 0;
     int numVertices = 0;
-    for (int i = 1; i <= V; i++) {
-        if (grauEntrada(g, i) == 0) {
+    for (int i = 1; i <= V; i++)
+    {
+        if (grauEntrada(g, i) == 0)
+        {
             raiz = i;
             numVertices++;
         }
     }
-    if (numVertices != 1) {
+    if (numVertices != 1)
+    {
         return false;
     }
     zerarFlags(g);
     profundidade(g, raiz);
-    for (int i = 1; i <= V; i++) {
-        if (g[i].flag != 2) {
+    for (int i = 1; i <= V; i++)
+    {
+        if (g[i].flag != 2)
+        {
             return false;
         }
     }
@@ -490,26 +523,15 @@ bool ehArvoreEnraizada(VERTICE *g) {
 // algoritmo que, dado g e um custo mínimo int c, retorne uma cópia de g contendo apenas as arestas
 // de custo maior do que c.
 
-bool inserirArestaComPeso(VERTICE *h, int i, int j, int peso) {
-    NO *ant;
-    NO *atual = arestaExiste(h, i, j, &ant);
-    if (atual)
-        return false; // já existe
-
-    NO *novo = (NO *)malloc(sizeof(NO));
-    novo->adj = j;
-    novo->prox = h[i].inicio;
-    novo->peso = peso;
-    h[i].inicio = novo;
-
-    return true;
-}
-
-void grafoComCustoMaior (VERTICE *g, VERTICE *h, int c) {
-    for (int i = 1; i <= V; i++) {
+void grafoComCustoMaior(VERTICE *g, VERTICE *h, int c)
+{
+    for (int i = 1; i <= V; i++)
+    {
         NO *p = g[i].inicio;
-        while (p) {
-            if (p->peso > c) {
+        while (p)
+        {
+            if (p->peso > c)
+            {
                 inserirArestaComPeso(h, i, p->adj, p->peso);
             }
         }
@@ -520,29 +542,36 @@ void grafoComCustoMaior (VERTICE *g, VERTICE *h, int c) {
 // de g1, retornando true/false conforme o caso. Para tornar o problema mais interessante, considere
 // que um grafo é representado em listas e outro em matriz.
 
-bool ehSubgrafo(VERTICE *g1, int matriz[V][V], VERTICE *g2) {
+bool ehSubgrafo(VERTICE *g1, int matriz[V][V], VERTICE *g2)
+{
     matrizParaLista(g2, matriz);
-    for (int i = 1; i <= V; i++) {
+    for (int i = 1; i <= V; i++)
+    {
         NO *p = g2[i].inicio;
         NO *ant = NULL;
-        while (p) {
-            if (!arestaExiste(g1, i, p->adj, &ant)){
+        while (p)
+        {
+            if (!arestaExiste(g1, i, p->adj, &ant))
+            {
                 return false; // aresta não existe em g1
             }
         }
     }
-
 }
 
 // 9. Dados dois grafos g1 e g2, escreva um algoritmo que retorne um grafo g3 cujas arestas estejam
 // presentes em g1 mas não em g2.
 
-void grafoExclusivoDeg1(VERTICE *g1, VERTICE *g2, VERTICE *g3) {
-    for (int i = 1; i <= V; i++) {
+void grafoExclusivoDeg1(VERTICE *g1, VERTICE *g2, VERTICE *g3)
+{
+    for (int i = 1; i <= V; i++)
+    {
         NO *p = g1[i].inicio;
         NO *ant = NULL;
-        while (p) {
-            if (!arestaExiste(g2, i, p->adj, &ant)) {
+        while (p)
+        {
+            if (!arestaExiste(g2, i, p->adj, &ant))
+            {
                 inserirArestaComPeso(g3, i, p->adj, p->peso);
             }
         }
@@ -556,40 +585,47 @@ void grafoExclusivoDeg1(VERTICE *g1, VERTICE *g2, VERTICE *g3) {
 // spam. Escreva um algoritmo para exibir os usuários suspeitos de iniciar a propagação de x. Um
 // usuário é considerado suspeito se ele próprio não recebeu a mensagem x nenhuma vez.
 
-typedef struct s
+typedef struct s2
 {
-    struct s *prox;
+    struct s2 *prox;
     int adj;
-    int id; 
+    int id;
 } EMAIL;
 
 // Estrutura de vértice: lista de adjacência + flags
 typedef struct
 {
     EMAIL *inicio; // início da lista de adjacência
-    int flag;   // usado para marcações de busca
-} USUARIO; 
+    int flag;      // usado para marcações de busca
+} USUARIO;
 
-int usuariosSuspeitos (USUARIO *g, int x, int **suspeitos) {
+int usuariosSuspeitos(USUARIO *g, int x, int **suspeitos)
+{
     int cont = 0;
     bool *recebeuSpam = (bool *)malloc(sizeof(bool) * (V + 1));
-    for (int i = 1; i <= V; i++) {
+    for (int i = 1; i <= V; i++)
+    {
         recebeuSpam[i] = false;
     }
-    for (int i = 1; i <= V; i++) {
+    for (int i = 1; i <= V; i++)
+    {
         EMAIL *p = g[i].inicio;
-        while (p) {
-            if (p->id == x) {
+        while (p)
+        {
+            if (p->id == x)
+            {
                 recebeuSpam[p->adj] = true;
             }
             p = p->prox;
         }
     }
     printf("Usuários suspeitos de iniciar a propagação de %d:\n", x);
-    for (int i = 1; i <= V; i++) {
-        if (!recebeuSpam[i]) {
+    for (int i = 1; i <= V; i++)
+    {
+        if (!recebeuSpam[i])
+        {
             suspeitos[cont] = (int *)malloc(sizeof(int));
-            suspeitos[cont] = i;
+            *suspeitos[cont] = i;
             cont++;
             printf("%d ", i);
         }
@@ -604,9 +640,9 @@ int usuariosSuspeitos (USUARIO *g, int x, int **suspeitos) {
 // global da empresa está muito alta. Escreva um algoritmo que identifique a unidade que efetua
 // chamadas para o maior número de países. Havendo empate, retorne qualquer resposta possível.
 
-typedef struct s
+typedef struct s3
 {
-    struct s *prox;
+    struct s3 *prox;
     int adj;
 } CHAMADA;
 
@@ -614,27 +650,32 @@ typedef struct s
 typedef struct
 {
     CHAMADA *inicio; // início da lista de adjacência
-    int pais; // país da unidade
-    int flag;   // usado para marcações de busca
-} UNIDADE; 
+    int pais;        // país da unidade
+    int flag;        // usado para marcações de busca
+} UNIDADE;
 
-int unidadeMaiorNumeroDePaises (UNIDADE *g) {
+int unidadeMaiorNumeroDePaises(UNIDADE *g)
+{
     int unidadeMaxima = -1;
     int maior = 0;
-    for (int i = 1; i <= V; i++) {
+    for (int i = 1; i <= V; i++)
+    {
         bool paisVisitado[V + 1] = {false};
         int temp = 0;
         CHAMADA *p = g[i].inicio;
 
-        while (p) {
+        while (p)
+        {
             int paisAdj = g[p->adj].pais;
-            if (paisAdj != g[i].pais && !paisVisitado[paisAdj]) {
+            if (paisAdj != g[i].pais && !paisVisitado[paisAdj])
+            {
                 paisVisitado[paisAdj] = true;
                 temp++;
             }
             p = p->prox;
         }
-        if (temp > maior) {
+        if (temp > maior)
+        {
             maior = temp;
             unidadeMaxima = i;
         }
@@ -644,9 +685,168 @@ int unidadeMaiorNumeroDePaises (UNIDADE *g) {
 
 // 12. Seja um grafo g não-dirigido. Escreva uma função para detectar ciclos em g, retornando true/false.
 
+bool detectarCicloProfundidade(VERTICE *g, int i)
+{
+    g[i].flag = 1;
+    NO *p = g[i].inicio;
+
+    while (p)
+    {
+        if (g[p->adj].flag == 0)
+        {
+            if (detectarCicloProfundidade(g, p->adj))
+            {
+                return true; // ciclo encontrado
+            }
+            else if (g[p->adj].flag == 1)
+            {
+                return true; // ciclo encontrado
+            }
+        }
+        p = p->prox;
+    }
+    g[i].flag = 2; // marca como visitado
+    return false;  // nenhum ciclo encontrado
+}
+
+bool detectarCicloLargura(VERTICE *g, int i)
+{
+    FILA *f = (FILA *)malloc(sizeof(FILA));
+    inicializaFila(f);
+    entrarFila(f, i);
+    g[i].flag = 1;
+
+    while (f)
+    {
+        i = sairFila(f);
+        g[i].flag = 2;
+        NO *p = g[i].inicio;
+        while (p)
+        {
+            if (g[p->adj].flag == 0)
+            {
+                entrarFila(f, p->adj);
+                g[p->adj].flag = 1;
+            }
+            else if (g[p->adj].flag == 1)
+            {
+                free(f);
+                return true; // ciclo encontrado
+            }
+            p = p->prox;
+        }
+    }
+    free(f);
+    return false; // nenhum ciclo encontrado
+}
+
 // 13. Variação 1: remover as arestas que provocam ciclo.
 
+bool detectarCicloProfundidadeV1(VERTICE *g, int i)
+{
+    g[i].flag = 1;
+    NO *p = g[i].inicio;
+
+    while (p)
+    {
+        if (g[p->adj].flag == 0)
+        {
+            if (detectarCicloProfundidade(g, p->adj))
+            {
+                return true; // ciclo encontrado
+            }
+            else if (g[p->adj].flag == 1)
+            {
+                excluirAresta(g, i, p->adj); // remove a aresta que provoca ciclo
+                g[p->adj].flag = 2;          // marca como visitado
+                return true;                 // ciclo encontrado
+            }
+        }
+        p = p->prox;
+    }
+    g[i].flag = 2; // marca como visitado
+    return false;  // nenhum ciclo encontrado
+}
+
+bool detectarCicloLarguraV1(VERTICE *g, int i)
+{
+    FILA *f = (FILA *)malloc(sizeof(FILA));
+    inicializaFila(f);
+    entrarFila(f, i);
+    g[i].flag = 1;
+
+    while (f)
+    {
+        i = sairFila(f);
+        g[i].flag = 2;
+        NO *p = g[i].inicio;
+        while (p)
+        {
+            if (g[p->adj].flag == 0)
+            {
+                entrarFila(f, p->adj);
+                g[p->adj].flag = 1;
+            }
+            else if (g[p->adj].flag == 1)
+            {
+                excluirAresta(g, i, p->adj); // remove a aresta que provoca ciclo
+                g[p->adj].flag = 2;          // marca como visitado
+                free(f);
+                return true; // ciclo encontrado
+            }
+            p = p->prox;
+        }
+    }
+    free(f);
+    return false; // nenhum ciclo encontrado
+}
+
 // 14. Variação 2: retornar o comprimento (i.e., a quantidade de arestas) do maior ciclo encontrado.
+
+void detectarCicloProfundidadeV2(VERTICE *g, int i, int *profundidade, int nivel, int *maiorCiclo)
+{
+    profundidade[i] = nivel; // Marca a profundidade do vértice na DFS
+    g[i].flag = 1;
+    NO *p = g[i].inicio;
+
+    while (p)
+    {
+        if (g[p->adj].flag == 0)
+        { // Vértice ainda não visitado
+            detectarCicloProfundidadeV2(g, p->adj, profundidade, nivel + 1, maiorCiclo);
+        }
+        else if (g[p->adj].flag == 1)
+        { // Encontrou um ciclo
+            int tamanhoCiclo = nivel - profundidade[p->adj] + 1;
+            if (tamanhoCiclo > *maiorCiclo)
+            {
+                *maiorCiclo = tamanhoCiclo;
+            }
+        }
+        p = p->prox;
+    }
+
+    g[i].flag = 2; // Marca como processado
+}
+
+int encontrarMaiorCiclo(VERTICE *g, int numVertices)
+{
+    int maiorCiclo = 0;
+    int *profundidade = (int *)malloc(numVertices * sizeof(int));
+
+    for (int i = 0; i < numVertices; i++)
+    {
+        memset(profundidade, -1, numVertices * sizeof(int)); // Inicializa profundidade como -1
+        for (int j = 0; j < numVertices; j++)
+        {
+            g[j].flag = 0; // Reseta flags para cada nova DFS
+        }
+        detectarCicloProfundidadeV2(g, i, profundidade, 0, &maiorCiclo);
+    }
+
+    free(profundidade);
+    return maiorCiclo;
+}
 
 // 15. Seja um grafo g não-conexo e não-dirigido. Escreva uma função para contar a quantidade de
 // grupos disjuntos de vértices mutuamente alcançáveis em g.
@@ -705,8 +905,6 @@ int unidadeMaiorNumeroDePaises (UNIDADE *g) {
 
 // 29. Variação: considere ainda que existe um local n que não deve ser visitado (por exemplo, n pode ser
 // uma área da cidade que foi interditada por alguma razão). Modifique o algoritmo de acordo.
-
-
 
 // -----------------------------
 // Função principal de testes
@@ -774,6 +972,25 @@ int main()
     {
         printf("Vértice %d veio de %d\n", i, g[i].via);
     }
+
+    printf("\nTESTE EXERCÍCIO 14: \n");
+    VERTICE g1[V + 1];
+    inicializar(g1);
+
+    inserirAresta(g1, 1, 2);
+    inserirAresta(g1, 1, 7);
+    inserirAresta(g1, 1, 10);
+    inserirAresta(g1, 2, 3);
+    inserirAresta(g1, 3, 4);
+    inserirAresta(g1, 4, 5);
+    inserirAresta(g1, 5, 6);
+    inserirAresta(g1, 6, 2);
+    inserirAresta(g1, 7, 9);
+    inserirAresta(g1, 9, 8);
+    inserirAresta(g1, 8, 7);
+    inserirAresta(g1, 10, 11);
+
+    printf("Comprimento do maior ciclo encontrado: %d\n", encontrarMaiorCiclo(g1, 11));
 
     return 0;
 }
