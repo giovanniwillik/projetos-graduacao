@@ -6,6 +6,114 @@
 #define V 11 // Número máximo de vértices
 
 // -----------------------------
+// ESTRUTURAS DE PILHA (DINÂMICA)
+// -----------------------------
+
+typedef struct NoPilha
+{
+    int dado;
+    struct NoPilha *proximo;
+} NoPilha;
+
+// Estrutura da pilha dinâmica
+typedef struct
+{
+    NoPilha *topo;
+    int tamanho;
+} Pilha;
+
+// Inicializa a pilha
+void inicializarPilha(Pilha *p)
+{
+    p->topo = NULL;
+    p->tamanho = 0;
+}
+
+// Reinicializa a pilha (limpa todos os elementos)
+void reinicializarPilha(Pilha *p)
+{
+    while (p->topo != NULL)
+    {
+        NoPilha *temp = p->topo;
+        p->topo = p->topo->proximo;
+        free(temp);
+    }
+    p->tamanho = 0;
+}
+
+// Verifica se a pilha está vazia
+int pilhaEstaVazia(Pilha *p)
+{
+    return p->topo == NULL;
+}
+
+// Empilha (Push) um elemento
+void push(Pilha *p, int valor)
+{
+    NoPilha *novoNo = (NoPilha *)malloc(sizeof(NoPilha));
+    if (!novoNo)
+    {
+        printf("Erro: Falha na alocação de memória!\n");
+        return;
+    }
+    novoNo->dado = valor;
+    novoNo->proximo = p->topo;
+    p->topo = novoNo;
+    p->tamanho++;
+}
+
+// Desempilha (Pop) um elemento
+int pop(Pilha *p)
+{
+    if (estaVazia(p))
+    {
+        printf("Erro: Pilha vazia!\n");
+        return -1;
+    }
+    NoPilha *temp = p->topo;
+    int valor = temp->dado;
+    p->topo = p->topo->proximo;
+    free(temp);
+    p->tamanho--;
+    return valor;
+}
+
+// Retorna o elemento do topo sem removê-lo (Peak)
+int peak(Pilha *p)
+{
+    if (estaVazia(p))
+    {
+        printf("Erro: Pilha vazia!\n");
+        return -1;
+    }
+    return p->topo->dado;
+}
+
+// Retorna o tamanho da pilha
+int tamanhoPilha(Pilha *p)
+{
+    return p->tamanho;
+}
+
+// Exibe os elementos da pilha
+void exibirPilha(Pilha *p)
+{
+    if (estaVazia(p))
+    {
+        printf("Pilha vazia!\n");
+        return;
+    }
+    NoPilha *atual = p->topo;
+    printf("Pilha: ");
+    while (atual != NULL)
+    {
+        printf("%d ", atual->dado);
+        atual = atual->proximo;
+    }
+    printf("\n");
+}
+
+// -----------------------------
 // ESTRUTURAS DE FILA (DINÂMICA)
 // -----------------------------
 
@@ -898,7 +1006,8 @@ void profundidadeContaTamanho(VERTICE *g, int i, int *tamanho)
     g[i].flag = 2;
 }
 
-void criaListaMaiorGrupo (VERTICE *g, int i, Lista *listaMaiorGrupo) {
+void criaListaMaiorGrupo(VERTICE *g, int i, Lista *listaMaiorGrupo)
+{
     zerarFlags(g);
     profundidade(g, i); // Marca todos os vértices do grupo
 
@@ -915,7 +1024,8 @@ void criaListaMaiorGrupo (VERTICE *g, int i, Lista *listaMaiorGrupo) {
     }
 }
 
-void listaMaiorGrupo(VERTICE *g, Lista *listaMaiorGrupo, int *maiorGrupo) {
+void listaMaiorGrupo(VERTICE *g, Lista *listaMaiorGrupo, int *maiorGrupo)
+{
 
     int grupos = 0;
     int *tamanhoGrupos = (int *)malloc(V * sizeof(int));
@@ -933,8 +1043,10 @@ void listaMaiorGrupo(VERTICE *g, Lista *listaMaiorGrupo, int *maiorGrupo) {
     }
     int maiorTamanho = 0;
     int fonteMaiorTamanho = 0;
-    for (int i = 1; i <= V; i++) {
-        if (tamanhoGrupos[i] > maiorTamanho) {
+    for (int i = 1; i <= V; i++)
+    {
+        if (tamanhoGrupos[i] > maiorTamanho)
+        {
             maiorTamanho = tamanhoGrupos[i];
             fonteMaiorTamanho = i;
         }
@@ -943,36 +1055,238 @@ void listaMaiorGrupo(VERTICE *g, Lista *listaMaiorGrupo, int *maiorGrupo) {
     printf("Vértices do maior grupo: ");
     criaListaMaiorGrupo(g, fonteMaiorTamanho, listaMaiorGrupo);
     No *p = listaMaiorGrupo->cabeca;
-    while (p != NULL) {
+    while (p != NULL)
+    {
         printf("%d ", p->valor);
         p = p->prox;
     }
     printf("\n");
     free(tamanhoGrupos);
     listaMaiorGrupo->cabeca = NULL; // Limpa a lista ligada
-    listaMaiorGrupo->tamanho = 0; // Reseta o tamanho da lista
-    free(listaMaiorGrupo); // Libera a memória da lista ligada
+    listaMaiorGrupo->tamanho = 0;   // Reseta o tamanho da lista
+    free(listaMaiorGrupo);          // Libera a memória da lista ligada
 }
 
 // 17. Seja um grafo g e dois vértices a e b. Verifique se há um caminho qualquer entre a e b retornando
 // true/false conforme o caso.
 
+bool haCaminho(VERTICE *g, int a, int b)
+{
+    g[a].flag = 1;
+    NO *p = g[a].inicio;
+    while (p)
+    {
+        if (p->adj == b)
+        {
+            return true;
+        }
+        if (g[p->adj].flag == 0)
+        {
+            if (haCaminho(g, p->adj, b))
+            {
+                return true;
+            }
+        }
+        p = p->prox;
+    }
+    return false; // Nenhum caminho encontrado
+}
+
 // 18. Variação 1: contar quantos vértices há no caminho de a até b.
 
+bool haCaminhoV1(VERTICE *g, int a, int b, int *contagem)
+{
+    g[a].flag = 1;
+    (*contagem)++;
+    NO *p = g[a].inicio;
+    while (p)
+    {
+        if (p->adj == b)
+        {
+            return true;
+        }
+        if (g[p->adj].flag == 0)
+        {
+            if (haCaminhoV1(g, p->adj, b, contagem))
+            {
+                (*contagem)++;
+                return true;
+            }
+        }
+        p = p->prox;
+    }
+    return false; // Nenhum caminho encontrado
+}
+
 // 19. Variação 2: retornar a lista dos vértices que compõe o caminho de a até b.
+
+bool haCaminhoV2(VERTICE *g, int a, int b)
+{
+    zerarFlags(g);
+    int j;
+    for (j = 1; j <= V; j++)
+    {
+        g[j].flag = 0;
+        g[j].via = -1; // Inicializa o vetor de predecessores
+    }
+    g[a].flag = 1;
+    g[a].via = 0; // Marca o vértice de origem
+    FILA *f = (FILA *)malloc(sizeof(FILA));
+    inicializaFila(f);
+    entrarFila(f, a);
+    while (f)
+    {
+        a = sairFila(f);
+        g[a].flag = 2;
+        NO *p = g[a].inicio;
+        while (p)
+        {
+            if (g[p->adj].flag == 0)
+            {
+                entrarFila(f, p->adj);
+                g[p->adj].flag = 1;
+                g[p->adj].via = a; // Marca o predecessor
+            }
+            p = p->prox;
+        }
+    }
+    free(f);
+    if (a != b && g[b].via == -1)
+    {
+        printf("Não existe caminho de %d até %d.\n", a, b);
+        return false;
+    }
+    int atual = b;
+    Pilha caminho;
+    inicializarPilha(&caminho);
+    while (atual != 0)
+    {
+        push(&caminho, atual); // Adiciona o vértice à pilha
+        atual = g[atual].via;  // Move para o predecessor
+    }
+
+    printf("Caminho de %d até %d:\n", a, b);
+    while (!pilhaEstaVazia(&caminho))
+    {
+        int vertice = pop(&caminho); // Remove o vértice da pilha
+        printf("%d", vertice);
+        if (!pilhaEstaVazia(&caminho))
+        {
+            printf(" -> ");
+        }
+    }
+    printf("\n");
+    return true; // Caminho encontrado
+}
 
 // 20. Um grafo não dirigido é completo se todos seus vértices são adjacentes, ou seja, existe uma aresta
 // conectando cada par de vértices de um grafo. Escreva um algoritmo que, dado um grafo simples g,
 // verifique se g é completo, retornando true/false conforme o caso.
 
+bool ehCompleto(VERTICE *g)
+{
+    for (int i = 1; i <= V; i++)
+    {
+        NO *p = g[i].inicio;
+        int cont = 0;
+        while (p)
+        {
+            cont++;
+            p = p->prox;
+        }
+        if (cont != V - 1)
+        {
+            return false; // Não é completo
+        }
+    }
+    return true; // É completo
+}
+
 // 21. Seja G = (V;A) um grafo simples e Ḡ = (V; V2-A) seu complemento, onde V2 é o conjunto de todos
 // os pares de vértices em V . Escreva um método que, dado um grafo simples G, retorne seu
 // complemento Ḡ.
+
+void grafoComplemento(VERTICE *g, VERTICE *h)
+{
+    for (int i = 1; i <= V; i++)
+    {
+        NO *p = g[i].inicio;
+        bool *temConexao = (bool *)malloc(sizeof(bool) * (V + 1));
+        for (int j = 1; j <= V; j++)
+        {
+            temConexao[j] = false; // Inicializa o vetor de conexões
+        }
+        while (p)
+        {
+            temConexao[p->adj] = true; // Marca a conexão
+            p = p->prox;
+        }
+        for (int j = 1; j <= V; j++)
+        {
+            if (i != j && !temConexao[j])
+            {
+                NO *novo = (NO *)malloc(sizeof(NO));
+                novo->adj = j;
+                novo->prox = h[i].inicio;
+                h[i].inicio = novo;
+            }
+        }
+    }
+}
 
 // 22. Seja um grafo g representando salas de aula (vértices) e suas ligações (arestas). Cada sala possui
 // uma ocupação representada por um inteiro. Escreva um algoritmo que, a partir da sala atual i,
 // encontre a sala vazia mais próxima, retornando o número do vértice correspondente. Havendo
 // mais de uma sala que atenda estas condições, retorne a primeira que encontrar.
+
+typedef struct slig
+{
+    struct slig *prox;
+    int adj;
+} LIGACOES;
+
+// Estrutura de vértice: lista de adjacência + flags
+typedef struct
+{
+    NO *inicio;   // início da lista de adjacência
+    int flag;     // usado para marcações de busca
+    int ocupacao; // ocupação da sala
+    int via;      // usado para reconstruir o menor caminho
+} SALA;
+
+int salaVaziaMaisProxima(SALA *g, int i)
+{
+    FILA *f = (FILA *)malloc(sizeof(FILA));
+    inicializaFila(f);
+    entrarFila(f, i);
+    g[i].flag = 1;
+    g[i].via = 0; // Marca o vértice de origem
+    while (f)
+    {
+        i = sairFila(f);
+        if (i != 0 && g[i].ocupacao == 0)
+        {
+            printf("Sala vazia mais próxima: %d\n", i);
+            free(f);
+            return i; // Retorna a sala vazia mais próxima
+        }
+        g[i].flag = 2;
+        NO *p = g[i].inicio;
+        while (p)
+        {
+            if (g[p->adj].flag == 0)
+            {
+                entrarFila(f, p->adj);
+                g[p->adj].flag = 1;
+                g[p->adj].via = i; // Marca o predecessor
+            }
+            p = p->prox;
+        }
+    }
+    free(f);
+    printf("Não existe sala vazia próxima.\n");
+    return -1; // Nenhuma sala vazia encontrada
+}
 
 // 23. Variação: havendo empate, retorne uma lista ligada contendo todas as salas vazias mais próximas.
 
