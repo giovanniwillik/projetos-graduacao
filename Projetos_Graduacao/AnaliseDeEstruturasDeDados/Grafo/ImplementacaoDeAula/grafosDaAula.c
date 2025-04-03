@@ -851,9 +851,108 @@ int encontrarMaiorCiclo(VERTICE *g, int numVertices)
 // 15. Seja um grafo g não-conexo e não-dirigido. Escreva uma função para contar a quantidade de
 // grupos disjuntos de vértices mutuamente alcançáveis em g.
 
+int contarGrupos(VERTICE *g)
+{
+    int grupos = 0;
+    for (int i = 1; i <= V; i++)
+    {
+        if (g[i].flag == 0)
+        {
+            grupos++;
+            profundidade(g, i); // Marca todos os vértices do grupo
+        }
+    }
+}
+
 // 16. Variação: ao invés de contar os grupos, retornar uma lista ligada contendo os vértices do maior
 // grupo identificado. Se dois ou mais grupos possuem a mesma quantidade de vértices, retornar a
 // lista de vértices de qualquer um.
+
+typedef struct No
+{
+    int valor;
+    struct No *prox;
+} No;
+
+// Estrutura da lista ligada circular
+typedef struct
+{
+    No *cabeca;
+    int tamanho;
+} Lista;
+
+void profundidadeContaTamanho(VERTICE *g, int i, int *tamanho)
+{
+    g[i].flag = 1;
+    *tamanho += 1; // Incrementa o tamanho do grupo
+    NO *p = g[i].inicio;
+
+    while (p)
+    {
+        if (g[p->adj].flag == 0)
+        {
+            profundidadeContaTamanho(g, p->adj, tamanho); // Marca todos os vértices do grupo
+        }
+        p = p->prox;
+    }
+    g[i].flag = 2;
+}
+
+void criaListaMaiorGrupo (VERTICE *g, int i, Lista *listaMaiorGrupo) {
+    zerarFlags(g);
+    profundidade(g, i); // Marca todos os vértices do grupo
+
+    for (int j = 1; j <= V; j++)
+    {
+        if (g[j].flag != 0)
+        { // Vértice pertence ao grupo
+            No *novo = (No *)malloc(sizeof(No));
+            novo->valor = j;
+            novo->prox = listaMaiorGrupo->cabeca;
+            listaMaiorGrupo->cabeca = novo;
+            listaMaiorGrupo->tamanho++;
+        }
+    }
+}
+
+void listaMaiorGrupo(VERTICE *g, Lista *listaMaiorGrupo, int *maiorGrupo) {
+
+    int grupos = 0;
+    int *tamanhoGrupos = (int *)malloc(V * sizeof(int));
+    for (int i = 0; i < V; i++)
+    {
+        tamanhoGrupos[i] = 0;
+    }
+    for (int i = 1; i <= V; i++)
+    {
+        if (g[i].flag == 0)
+        {
+            grupos++;
+            profundidadeContaTamanho(g, i, &tamanhoGrupos[i]); // Marca todos os vértices do grupo
+        }
+    }
+    int maiorTamanho = 0;
+    int fonteMaiorTamanho = 0;
+    for (int i = 1; i <= V; i++) {
+        if (tamanhoGrupos[i] > maiorTamanho) {
+            maiorTamanho = tamanhoGrupos[i];
+            fonteMaiorTamanho = i;
+        }
+    }
+    printf("Tamanho do maior grupo: %d\n", maiorTamanho);
+    printf("Vértices do maior grupo: ");
+    criaListaMaiorGrupo(g, fonteMaiorTamanho, listaMaiorGrupo);
+    No *p = listaMaiorGrupo->cabeca;
+    while (p != NULL) {
+        printf("%d ", p->valor);
+        p = p->prox;
+    }
+    printf("\n");
+    free(tamanhoGrupos);
+    listaMaiorGrupo->cabeca = NULL; // Limpa a lista ligada
+    listaMaiorGrupo->tamanho = 0; // Reseta o tamanho da lista
+    free(listaMaiorGrupo); // Libera a memória da lista ligada
+}
 
 // 17. Seja um grafo g e dois vértices a e b. Verifique se há um caminho qualquer entre a e b retornando
 // true/false conforme o caso.
