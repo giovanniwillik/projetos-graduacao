@@ -980,12 +980,12 @@ typedef struct No
 {
     int valor;
     struct No *prox;
-} No;
+} NoLista;
 
 // Estrutura da lista ligada circular
 typedef struct
 {
-    No *cabeca;
+    NoLista *cabeca;
     int tamanho;
 } Lista;
 
@@ -1015,7 +1015,7 @@ void criaListaMaiorGrupo(VERTICE *g, int i, Lista *listaMaiorGrupo)
     {
         if (g[j].flag != 0)
         { // Vértice pertence ao grupo
-            No *novo = (No *)malloc(sizeof(No));
+            NoLista *novo = (NoLista *)malloc(sizeof(NoLista));
             novo->valor = j;
             novo->prox = listaMaiorGrupo->cabeca;
             listaMaiorGrupo->cabeca = novo;
@@ -1054,7 +1054,7 @@ void listaMaiorGrupo(VERTICE *g, Lista *listaMaiorGrupo, int *maiorGrupo)
     printf("Tamanho do maior grupo: %d\n", maiorTamanho);
     printf("Vértices do maior grupo: ");
     criaListaMaiorGrupo(g, fonteMaiorTamanho, listaMaiorGrupo);
-    No *p = listaMaiorGrupo->cabeca;
+    NoLista *p = listaMaiorGrupo->cabeca;
     while (p != NULL)
     {
         printf("%d ", p->valor);
@@ -1248,7 +1248,7 @@ typedef struct slig
 // Estrutura de vértice: lista de adjacência + flags
 typedef struct
 {
-    NO *inicio;   // início da lista de adjacência
+    LIGACOES *inicio;   // início da lista de adjacência
     int flag;     // usado para marcações de busca
     int ocupacao; // ocupação da sala
     int via;      // usado para reconstruir o menor caminho
@@ -1271,7 +1271,7 @@ int salaVaziaMaisProxima(SALA *g, int i)
             return i; // Retorna a sala vazia mais próxima
         }
         g[i].flag = 2;
-        NO *p = g[i].inicio;
+        LIGACOES *p = g[i].inicio;
         while (p)
         {
             if (g[p->adj].flag == 0)
@@ -1290,8 +1290,89 @@ int salaVaziaMaisProxima(SALA *g, int i)
 
 // 23. Variação: havendo empate, retorne uma lista ligada contendo todas as salas vazias mais próximas.
 
+Lista salaVaziaMaisProximaV(SALA *g, int i)
+{
+    Lista listaSalasVazias;
+    listaSalasVazias.cabeca = NULL;
+    listaSalasVazias.tamanho = 0;
+    FILA *f = (FILA *)malloc(sizeof(FILA));
+    inicializaFila(f);
+    entrarFila(f, i);
+    g[i].flag = 1;
+    g[i].via = 0; // Marca o vértice de origem
+    while (f)
+    {
+        i = sairFila(f);
+        if (i != 0 && g[i].ocupacao == 0)
+        {
+            NoLista *novo = (NoLista *)malloc(sizeof(NoLista));
+            novo->valor = i;
+            novo->prox = listaSalasVazias.cabeca;
+            listaSalasVazias.cabeca = novo;
+            listaSalasVazias.tamanho++;
+        }
+        g[i].flag = 2;
+        NO *p = g[i].inicio;
+        while (p)
+        {
+            if (g[p->adj].flag == 0)
+            {
+                entrarFila(f, p->adj);
+                g[p->adj].flag = 1;
+                g[p->adj].via = i; // Marca o predecessor
+            }
+            p = p->prox;
+        }
+    }
+    free(f);
+    if (listaSalasVazias.tamanho == 0)
+    {
+        printf("Não existe sala vazia próxima.\n");
+    }
+    else
+    {
+        printf("Salas vazias mais próximas: ");
+        NoLista *p = listaSalasVazias.cabeca;
+        while (p != NULL)
+        {
+            printf("%d ", p->valor);
+            p = p->prox;
+        }
+        printf("\n");
+    }
+    return listaSalasVazias; // Retorna a lista de salas vazias mais próximas
+}
+
 // 24. Para todos os vértices de um grafo, calcular o tamanho do caminho mais curto a partir de um
 // vértice inicial i.
+
+int *caminhoMaisCurto(VERTICE *g, int i) {
+    zerarFlags(g); // Reseta as flags
+    int *distancias = (int *)malloc(sizeof(int) * (V + 1));
+    for (int j = 1; j <= V; j++) {
+        distancias[j] = -1; // Inicializa todas as distâncias como -1
+    }
+    distancias[i] = 0; // Distância do vértice inicial para ele mesmo é 0
+    FILA *f = (FILA *)malloc(sizeof(FILA));
+    inicializaFila(f);
+    entrarFila(f, i);
+    g[i].flag = 1; // Marca o vértice inicial como visitado
+    while (f) {
+        i = sairFila(f);
+        g[i].flag = 2; // Marca o vértice como processado
+        NO *p = g[i].inicio;
+        while (p) {
+            if (g[p->adj].flag == 0) {
+                entrarFila(f, p->adj);
+                g[p->adj].flag = 1; // Marca o vértice adjacente como visitado
+                distancias[p->adj] = distancias[i] + 1; // Atualiza a distância
+            }
+            p = p->prox;
+        }
+    }
+    free(f);
+    return distancias; // Retorna o vetor de distâncias
+}
 
 // 25. Seja um grafo não-dirigido representando uma rede social. Os vértices são os usuários e as arestas
 // indicam relações (e.g., de amizade) entre pares de usuários. Dado um usuário i, escreva um
@@ -1299,12 +1380,94 @@ int salaVaziaMaisProxima(SALA *g, int i)
 // quantidade de arestas). Os amigos imediatos estão no grau 1, os amigos dos amigos no grau 2, e
 // assim por diante.
 
+void exibirUsuariosDistancia(VERTICE *g, int i, int d)
+{
+    zerarFlags(g); // Reseta as flags
+    int *distancias = (int *)malloc(sizeof(int) * (V + 1));
+    for (int j = 1; j <= V; j++) {
+        distancias[j] = -1; // Inicializa todas as distâncias como -1
+    }
+    distancias[i] = 0; // Distância do vértice inicial para ele mesmo é 0
+    FILA *f = (FILA *)malloc(sizeof(FILA));
+    inicializaFila(f);
+    entrarFila(f, i);
+    g[i].flag = 1; // Marca o vértice inicial como visitado
+    while (f) {
+        i = sairFila(f);
+        if (distancias[i] > d) {
+            break; // Se a distância for maior que d, sai do loop
+        }
+        printf("Usuário %d (distância %d)\n", i, distancias[i]);
+        g[i].flag = 2; // Marca o vértice como processado
+        NO *p = g[i].inicio;
+        while (p) {
+            if (g[p->adj].flag == 0) {
+                entrarFila(f, p->adj);
+                g[p->adj].flag = 1; // Marca o vértice adjacente como visitado
+                distancias[p->adj] = distancias[i] + 1; // Atualiza a distância
+            }
+            p = p->prox;
+        }
+    }
+    free(f);
+}
+
 // 26. Seja um grafo dirigido representando trocas de email entre usuários. Os vértices são usuários e as
 // arestas orientadas indicam que houve envio de mensagens na respectiva direção, incluindo um
 // contador do número de mensagens enviadas. Escreva um algoritmo que, dado um usuário atual i,
 // retorne uma lista ligada contendo todos os usuários que estão diretamente relacionados com i, e
 // que enviaram ou receberam pelo menos k mensagens de/para i. A constante k é fornecida como
 // parâmetro de entrada para a função.
+
+Lista usuariosRelacionados(VERTICE *g, int i, int k) {
+    int *contagemMensagens = (int *)malloc(sizeof(int) * (V + 1));
+    for (int j = 1; j <= V; j++) {
+        contagemMensagens[j] = 0; // Inicializa todas as contagens como 0
+    }
+    for (int j = 1; j <= V; j++) {
+        if (j == i) {
+            NO *p = g[j].inicio;
+            while (p) {
+                contagemMensagens[p->adj] += p->peso; // Incrementa a contagem de mensagens enviadas
+                p = p->prox;
+            }
+        } 
+        else {
+            NO *p = g[j].inicio;
+            while (p) {
+                if (p->adj == i) {
+                    contagemMensagens[j] += p->peso; // Incrementa a contagem de mensagens recebidas
+                }
+                p = p->prox;
+            }
+        }
+    }
+    Lista listaUsuarios;
+    listaUsuarios.cabeca = NULL;
+    listaUsuarios.tamanho = 0;
+    for (int j = 1; j <= V; j++) {
+        if (contagemMensagens[j] >= k) {
+            NoLista *novo = (NoLista *)malloc(sizeof(NoLista));
+            novo->valor = j;
+            novo->prox = listaUsuarios.cabeca;
+            listaUsuarios.cabeca = novo;
+            listaUsuarios.tamanho++;
+        }
+    }
+    free(contagemMensagens);
+    if (listaUsuarios.tamanho == 0) {
+        printf("Nenhum usuário relacionado encontrado.\n");
+    } else {
+        printf("Usuários relacionados com %d (mínimo de %d mensagens): ", i, k);
+        NoLista *p = listaUsuarios.cabeca;
+        while (p != NULL) {
+            printf("%d ", p->valor);
+            p = p->prox;
+        }
+        printf("\n");
+    }
+    return listaUsuarios; // Retorna a lista de usuários relacionados
+}
 
 // 27. Seja um grafo representando uma malha aérea. Vértices são cidades e arestas são voos. Escreva um
 // algoritmo que, dada uma cidade origem a, um destino b e uma companhia aérea c, encontre o
