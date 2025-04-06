@@ -207,9 +207,10 @@ typedef struct s
 // Estrutura de vértice: lista de adjacência + flags
 typedef struct
 {
-    NO *inicio; // início da lista de adjacência
-    int flag;   // usado para marcações de busca
-    int via;    // usado para reconstruir o menor caminho
+    NO *inicio;    // início da lista de adjacência
+    int flag;      // usado para marcações de busca
+    int via;       // usado para reconstruir o menor caminho
+    int interesse; // usado para armazenar o interesse do vértice (opcional)
 } VERTICE;
 
 // Inicializa o grafo com todas as listas vazias
@@ -1248,10 +1249,10 @@ typedef struct slig
 // Estrutura de vértice: lista de adjacência + flags
 typedef struct
 {
-    LIGACOES *inicio;   // início da lista de adjacência
-    int flag;     // usado para marcações de busca
-    int ocupacao; // ocupação da sala
-    int via;      // usado para reconstruir o menor caminho
+    LIGACOES *inicio; // início da lista de adjacência
+    int flag;         // usado para marcações de busca
+    int ocupacao;     // ocupação da sala
+    int via;          // usado para reconstruir o menor caminho
 } SALA;
 
 int salaVaziaMaisProxima(SALA *g, int i)
@@ -1346,10 +1347,12 @@ Lista salaVaziaMaisProximaV(SALA *g, int i)
 // 24. Para todos os vértices de um grafo, calcular o tamanho do caminho mais curto a partir de um
 // vértice inicial i.
 
-int *caminhoMaisCurto(VERTICE *g, int i) {
+int *caminhoMaisCurto(VERTICE *g, int i)
+{
     zerarFlags(g); // Reseta as flags
     int *distancias = (int *)malloc(sizeof(int) * (V + 1));
-    for (int j = 1; j <= V; j++) {
+    for (int j = 1; j <= V; j++)
+    {
         distancias[j] = -1; // Inicializa todas as distâncias como -1
     }
     distancias[i] = 0; // Distância do vértice inicial para ele mesmo é 0
@@ -1357,14 +1360,17 @@ int *caminhoMaisCurto(VERTICE *g, int i) {
     inicializaFila(f);
     entrarFila(f, i);
     g[i].flag = 1; // Marca o vértice inicial como visitado
-    while (f) {
+    while (f)
+    {
         i = sairFila(f);
         g[i].flag = 2; // Marca o vértice como processado
         NO *p = g[i].inicio;
-        while (p) {
-            if (g[p->adj].flag == 0) {
+        while (p)
+        {
+            if (g[p->adj].flag == 0)
+            {
                 entrarFila(f, p->adj);
-                g[p->adj].flag = 1; // Marca o vértice adjacente como visitado
+                g[p->adj].flag = 1;                     // Marca o vértice adjacente como visitado
                 distancias[p->adj] = distancias[i] + 1; // Atualiza a distância
             }
             p = p->prox;
@@ -1384,7 +1390,8 @@ void exibirUsuariosDistancia(VERTICE *g, int i, int d)
 {
     zerarFlags(g); // Reseta as flags
     int *distancias = (int *)malloc(sizeof(int) * (V + 1));
-    for (int j = 1; j <= V; j++) {
+    for (int j = 1; j <= V; j++)
+    {
         distancias[j] = -1; // Inicializa todas as distâncias como -1
     }
     distancias[i] = 0; // Distância do vértice inicial para ele mesmo é 0
@@ -1392,18 +1399,22 @@ void exibirUsuariosDistancia(VERTICE *g, int i, int d)
     inicializaFila(f);
     entrarFila(f, i);
     g[i].flag = 1; // Marca o vértice inicial como visitado
-    while (f) {
+    while (f)
+    {
         i = sairFila(f);
-        if (distancias[i] > d) {
+        if (distancias[i] > d)
+        {
             break; // Se a distância for maior que d, sai do loop
         }
         printf("Usuário %d (distância %d)\n", i, distancias[i]);
         g[i].flag = 2; // Marca o vértice como processado
         NO *p = g[i].inicio;
-        while (p) {
-            if (g[p->adj].flag == 0) {
+        while (p)
+        {
+            if (g[p->adj].flag == 0)
+            {
                 entrarFila(f, p->adj);
-                g[p->adj].flag = 1; // Marca o vértice adjacente como visitado
+                g[p->adj].flag = 1;                     // Marca o vértice adjacente como visitado
                 distancias[p->adj] = distancias[i] + 1; // Atualiza a distância
             }
             p = p->prox;
@@ -1419,23 +1430,31 @@ void exibirUsuariosDistancia(VERTICE *g, int i, int d)
 // que enviaram ou receberam pelo menos k mensagens de/para i. A constante k é fornecida como
 // parâmetro de entrada para a função.
 
-Lista usuariosRelacionados(VERTICE *g, int i, int k) {
+Lista usuariosRelacionados(VERTICE *g, int i, int k)
+{
     int *contagemMensagens = (int *)malloc(sizeof(int) * (V + 1));
-    for (int j = 1; j <= V; j++) {
+    for (int j = 1; j <= V; j++)
+    {
         contagemMensagens[j] = 0; // Inicializa todas as contagens como 0
     }
-    for (int j = 1; j <= V; j++) {
-        if (j == i) {
+    for (int j = 1; j <= V; j++)
+    {
+        if (j == i)
+        {
             NO *p = g[j].inicio;
-            while (p) {
+            while (p)
+            {
                 contagemMensagens[p->adj] += p->peso; // Incrementa a contagem de mensagens enviadas
                 p = p->prox;
             }
-        } 
-        else {
+        }
+        else
+        {
             NO *p = g[j].inicio;
-            while (p) {
-                if (p->adj == i) {
+            while (p)
+            {
+                if (p->adj == i)
+                {
                     contagemMensagens[j] += p->peso; // Incrementa a contagem de mensagens recebidas
                 }
                 p = p->prox;
@@ -1445,8 +1464,10 @@ Lista usuariosRelacionados(VERTICE *g, int i, int k) {
     Lista listaUsuarios;
     listaUsuarios.cabeca = NULL;
     listaUsuarios.tamanho = 0;
-    for (int j = 1; j <= V; j++) {
-        if (contagemMensagens[j] >= k) {
+    for (int j = 1; j <= V; j++)
+    {
+        if (contagemMensagens[j] >= k)
+        {
             NoLista *novo = (NoLista *)malloc(sizeof(NoLista));
             novo->valor = j;
             novo->prox = listaUsuarios.cabeca;
@@ -1455,12 +1476,16 @@ Lista usuariosRelacionados(VERTICE *g, int i, int k) {
         }
     }
     free(contagemMensagens);
-    if (listaUsuarios.tamanho == 0) {
+    if (listaUsuarios.tamanho == 0)
+    {
         printf("Nenhum usuário relacionado encontrado.\n");
-    } else {
+    }
+    else
+    {
         printf("Usuários relacionados com %d (mínimo de %d mensagens): ", i, k);
         NoLista *p = listaUsuarios.cabeca;
-        while (p != NULL) {
+        while (p != NULL)
+        {
             printf("%d ", p->valor);
             p = p->prox;
         }
@@ -1474,13 +1499,146 @@ Lista usuariosRelacionados(VERTICE *g, int i, int k) {
 // trajeto com menor número de conexões de a até b voando apenas pela companhia c. A resposta
 // deve ser fornecida na forma de uma lista ligada de vértices de a até b.
 
+Lista trajetoMenorConexoes(VERTICE *g, int a, int b, int c)
+{
+    FILA *f = (FILA *)malloc(sizeof(FILA));
+    inicializaFila(f);
+    entrarFila(f, a);
+    g[a].flag = 1; // Marca o vértice inicial como visitado
+    g[a].via = 0;  // Marca o vértice de origem
+    Lista listaTrajeto;
+    listaTrajeto.cabeca = NULL;
+    listaTrajeto.tamanho = 0;
+    while (f)
+    {
+        a = sairFila(f);
+        if (a == b)
+        {
+            break; // Chegou ao destino
+        }
+        g[a].flag = 2; // Marca o vértice como processado
+        NO *p = g[a].inicio;
+        while (p)
+        {
+            if (g[p->adj].flag == 0 && p->peso == c)
+            {
+                entrarFila(f, p->adj);
+                g[p->adj].flag = 1; // Marca o vértice adjacente como visitado
+                g[p->adj].via = a;  // Marca o predecessor
+            }
+            p = p->prox;
+        }
+    }
+    free(f);
+    if (a != b && g[b].via == -1)
+    {
+        printf("Não existe trajeto de %d até %d com a companhia %d.\n", a, b, c);
+        return listaTrajeto; // Nenhum trajeto encontrado
+    }
+    int atual = b;
+    while (atual != 0)
+    {
+        NoLista *novo = (NoLista *)malloc(sizeof(NoLista));
+        novo->valor = atual;
+        novo->prox = listaTrajeto.cabeca;
+        listaTrajeto.cabeca = novo;
+        listaTrajeto.tamanho++;
+        atual = g[atual].via; // Move para o predecessor
+    }
+    printf("Trajeto de %d até %d com a companhia %d:\n", a, b, c);
+    NoLista *p = listaTrajeto.cabeca;
+    while (p != NULL)
+    {
+        printf("%d", p->valor);
+        if (p->prox != NULL)
+        {
+            printf(" -> ");
+        }
+        p = p->prox;
+    }
+    printf("\n");
+    return listaTrajeto; // Retorna a lista de vértices do trajeto
+}
+
 // 28. Seja um grafo representando as ruas de uma cidade ligando pontos de interesse identificados por
 // um código numérico inteiro (1=hotéis, 2=restaurante etc.) Escreva um algoritmo que, dado um
 // código de ponto de interesse x e uma posição atual i, retorne o vértice contendo o x mais próximo.
 // Havendo empate, retorne o primeiro que encontrar.
 
+VERTICE *pontoDeInteresse(VERTICE *g, int i, int x)
+{
+    FILA *f = (FILA *)malloc(sizeof(FILA));
+    inicializaFila(f);
+    entrarFila(f, i);
+    g[i].flag = 1; // Marca o vértice inicial como visitado
+    g[i].via = 0;  // Marca o vértice de origem
+    while (f)
+    {
+        i = sairFila(f);
+        if (g[i].interesse == x)
+        {
+            printf("Ponto de interesse %d encontrado em %d.\n", x, i);
+            free(f);
+            return &g[i]; // Retorna o vértice com o ponto de interesse
+        }
+        g[i].flag = 2; // Marca o vértice como processado
+        NO *p = g[i].inicio;
+        while (p)
+        {
+            if (g[p->adj].flag == 0)
+            {
+                entrarFila(f, p->adj);
+                g[p->adj].flag = 1; // Marca o vértice adjacente como visitado
+                g[p->adj].via = i;  // Marca o predecessor
+            }
+            p = p->prox;
+        }
+    }
+    free(f);
+    printf("Nenhum ponto de interesse %d encontrado.\n", x);
+    return NULL; // Nenhum ponto de interesse encontrado
+}
+
 // 29. Variação: considere ainda que existe um local n que não deve ser visitado (por exemplo, n pode ser
 // uma área da cidade que foi interditada por alguma razão). Modifique o algoritmo de acordo.
+
+VERTICE *pontoDeInteresseV(VERTICE *g, int i, int x, int n)
+{
+    FILA *f = (FILA *)malloc(sizeof(FILA));
+    inicializaFila(f);
+    entrarFila(f, i);
+    g[i].flag = 1; // Marca o vértice inicial como visitado
+    g[i].via = 0;  // Marca o vértice de origem
+    while (f)
+    {
+        i = sairFila(f);
+        if (g[i].interesse == x)
+        {
+            printf("Ponto de interesse %d encontrado em %d.\n", x, i);
+            free(f);
+            return &g[i]; // Retorna o vértice com o ponto de interesse
+        }
+        if (i == n)
+        {
+            continue; // Ignora o local interditado
+        }
+        g[i].flag = 2; // Marca o vértice como processado
+        NO *p = g[i].inicio;
+        while (p)
+        {
+            if (g[p->adj].flag == 0 && p->adj != n)
+            {
+                entrarFila(f, p->adj);
+                g[p->adj].flag = 1; // Marca o vértice adjacente como visitado
+                g[p->adj].via = i;  // Marca o predecessor
+            }
+            p = p->prox;
+        }
+    }
+    free(f);
+    printf("Nenhum ponto de interesse %d encontrado.\n", x);
+    return NULL; // Nenhum ponto de interesse encontrado
+}
 
 // -----------------------------
 // Função principal de testes
