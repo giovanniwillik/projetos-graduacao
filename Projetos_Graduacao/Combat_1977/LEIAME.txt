@@ -1,0 +1,64 @@
+-------------Descrição-------------
+
+Este repositório contém a implementação do jogo Combat! a partir de oito arquivos `.class` já antes desenvolvidos, mas com seus respectivos `.java` perdidos.
+
+-------------Arquivos e diretórios-------------
+
+- src/                        (diretório contendo os arquivos .java desenvolvidos pelo aluno)
+    ├── Player.java           (implementa os jogadores controláveis pelos usuários)
+    ├── Wall.java             (implementa as paredes do jogo)
+    ├── Shot.java             (implementa os disparos do jogo)
+    └── Score.java            (implementa o placar do jogo)
+
+- (raiz do projeto)           (arquivos fornecidos pela disciplina – não modificar)
+    ├── Combat.class          (classe principal do jogo)
+    ├── GameLib.class         (biblioteca gráfica)
+    ├── Collision.class       (biblioteca de colisões)
+    ├── Collision$Box.class   (componente auxiliar de colisões)
+    ├── ISolid.class          (interface de colisões)
+    ├── Map.class             (geração de arena)
+    ├── MyKeyAdapter.class    (captura de eventos de teclado)
+    └── PlayerController.class (controle de jogador)
+
+- bin/                        (diretório gerado automaticamente com os arquivos .class compilados)
+- LEIAME.txt                  (este arquivo)
+- Makefile                    (arquivo com regras para compilar, executar e limpar o projeto)
+
+-------------Pré-requisitos-------------
+
+- Java SE Development Kit (JDK) 21 ou superior instalado.
+- GNU Make (versão 4.4.1 ou compatível) instalado.
+- Sistema operacional recomendado: Linux (x86_64) ou Windows com MSYS2 configurado.
+
+-------------Instruções de compilação e execução (linha de comando)-------------
+
+1. Abra um terminal e navegue até a raiz deste projeto (onde está o arquivo `Makefile`).
+
+2. Para compilar os arquivos .java desenvolvidos, digite:
+
+   make
+
+   Este comando criará o diretório `bin/` (caso não exista) e compilará os arquivos em `src/`, gerando os arquivos `.class` no mesmo diretório `src/`.
+
+3. Para executar o jogo Combat!, digite:
+
+   make run
+
+   Esse comando executará a aplicação iniciando pela classe principal `Combat`, incluindo o diretório `src/` no classpath.
+
+4. Para remover os arquivos compilados (Player.class, Shot.class, Score.class, Wall.class), digite:
+
+   make clean
+
+   Isso apagará os arquivos `.class` gerados na pasta `src/` para os arquivos que correspondem aos arquivos `.java`. Arquivos `.class` de outras bibliotecas fornecidas, como `Combat.class`, `GameLib.class`, etc., não serão afetados.
+
+
+-------------Instruções de compilação e execução (IDE)-------------
+
+1. Abra o projeto em sua IDE (IntelliJ, VS Code, ...)
+
+2. No terminal da IDE, navegue para dentro da pasta `src`, utilizando o comando `cd src` (certifique-se que você está com o terminal na raiz do projeto antes de tentar entrar em `src`)
+
+3. Execute o comando `javac *.java` para compilar todos os arquivos `.java` presentes no diretório (após essa ação, devem ser criados quatro novos arquivos na pasta: `Player.class`, `Shot.class`, `Score.class`, `Wall.class`)
+
+4. Após todos os arquivos serem compilados com sucesso, execute a classe principal do projeto com o comando `java Combat`
