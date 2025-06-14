@@ -1,0 +1,119 @@
+Refatoração do "Gerador de Relatórios" com Padrões de Projeto e Coleções Java
+Disciplina: ACH2003 — Computação Orientada a Objetos Professor
+
+
+---------Introdução e Objetivo do Projeto---------
+
+O objetivo deste Exercício-Programa (EP2) foi refatorar o código de um "Gerador de Relatórios" em Java, visando modernizá-lo, torná-lo mais orientado a objetos e extensível. As principais diretrizes da refatoração incluíram o emprego dos padrões de projeto Strategy e Decorator, a adoção do arcabouço de coleções de Java e a implementação de novas funcionalidades.
+
+
+---------Detalhamento das Modificações Arquiteturais e Implementações---------
+
+Para resolver os problemas supracitados e atender às exigências do EP2.pdf, as seguintes modificações foram sistematicamente aplicadas:
+
+1.Aplicação do Padrão Strategy
+
+- O padrão Strategy foi empregado para desacoplar os algoritmos de ordenação e os critérios de ordenação e filtragem da classe GeradorDeRelatorios.
+
+- Propósito: Definir uma família de algoritmos, encapsular cada um deles e torná-los intercambiáveis. O Strategy permite que o algoritmo varie independentemente dos clientes que o utilizam.
+
+- Classes/Interfaces Criadas/Modificadas:
+    
+    - Para Algoritmos de Ordenação:
+
+        - Foi criada a interface AlgoritmoOrdenacao, definindo o contrato para qualquer algoritmo de ordenação (ex: void ordenar(List<Produto> produtos, Comparator<Produto> criterio)).
+        - As implementações concretas QuickSort e InsertionSort foram adaptadas para implementar esta interface e trabalhar com List<Produto>.
+
+    - Para Critérios de Ordenação:
+
+        - Foi criada a interface CriterioOrdenacao, que estende java.util.Comparator<Produto>. Esta interface define como dois objetos Produto devem ser comparados para fins de ordenação.
+        - As implementações concretas para os critérios originais foram criadas: CriterioDescricaoCrescente, CriterioPrecoCrescente, CriterioEstoqueCrescente.
+        - Novas Funcionalidades: Foram adicionados três novos critérios de ordenação em ordem decrescente, simplesmente criando novas classes que implementam CriterioOrdenacao: CriterioDescricaoDecrescente, CriterioPrecoDecrescente, e CriterioEstoqueDecrescente.
+
+    - Para Critérios de Filtragem:
+    
+        - Foi criada a interface CriterioFiltragem, com um método que determina se um produto deve ser incluído na listagem (ex: boolean aceita(Produto produto)).
+        - As implementações concretas para os critérios originais foram criadas: FiltroTodos, FiltroEstoqueMenorIgual (que recebe um parâmetro de quantidade), e FiltroCategoriaIgual (que recebe um parâmetro de categoria).
+        - Novas Funcionalidades: Foram implementados dois novos critérios de filtragem:
+            - FiltroPrecoIntervalo: Filtra produtos cujo preço está dentro de um intervalo mínimo e máximo.
+            - FiltroDescricaoContem: Filtra produtos cuja descrição contém uma determinada substring.
+
+    - Impacto na Classe GeradorDeRelatorios:
+
+        - A classe GeradorDeRelatorios agora mantém instâncias das interfaces AlgoritmoOrdenacao, CriterioOrdenacao e CriterioFiltragem.
+        - Sua lógica foi simplificada, pois ela delega a execução da ordenação e filtragem para as estratégias configuradas, tornando-a agnóstica aos detalhes de implementação específicos.
+        - Justificativa: A aplicação do Strategy transformou os aspectos comportamentais 1, 2 e 3 em módulos plugáveis. Isso resultou em um acoplamento muito baixo entre GeradorDeRelatorios e os algoritmos/critérios, permitindo adicionar novas lógicas de ordenação ou filtragem (como os critérios decrescentes ou os novos filtros) sem modificar a classe GeradorDeRelatorios — um exemplo claro do Princípio Aberto/Fechado em ação.
+
+2. Aplicação do Padrão Decorator
+
+- O padrão Decorator foi utilizado para lidar com as opções de formatação, resolvendo a limitação de formatação global imposta pela versão original.
+
+- Propósito: Anexar responsabilidades adicionais a um objeto (neste caso, Produto) de forma dinâmica, flexível e transparente, sem alterar sua estrutura original.
+
+- Classes/Interfaces Criadas/Modificadas:
+
+    - A interface Produto (existente) atua como o componente base a ser decorado. Ela foi mantida inalterada, conforme restrição do EP2.pdf.
+
+    - Foi criada uma classe abstrata ProdutoDecorator, que implementa a interface Produto e mantém uma referência para um objeto Produto encapsulado.
+
+    - Implementações concretas dos decoradores foram desenvolvidas:
+        
+        - ProdutoItalicoDecorator: Adiciona formatação em itálico.
+        - ProdutoNegritoDecorator: Adiciona formatação em negrito.
+        - Nova Funcionalidade: ProdutoCorDecorator: Permite especificar uma cor para o texto do produto no relatório HTML.
+
+    - Impacto na Formatação:
+
+        - A responsabilidade de aplicar tags HTML de formatação foi movida para as classes Decorator.
+        - Cada instância de Produto que precisa de formatação específica pode ser "envolvida" por um ou mais decoradores. Por exemplo, new ProdutoNegritoDecorator(new ProdutoItalicoDecorator(produtoOriginal)).
+        - Isso permite a formatação individualizada e a combinação de múltiplas formatações para um único produto, algo impossível na versão original.
+        - Justificativa: O Decorator resolve o problema da formatação global de forma elegante. Em vez de uma explosão de subclasses (ProdutoNegritoItalico, ProdutoNegritoItalicoColorido, etc.), o sistema permite a composição dinâmica de funcionalidades de formatação. A aderência à restrição de não modificar Produto ou ProdutoPadrao foi crucial, e o Decorator permitiu adicionar funcionalidades sem tocar nessas classes base.
+
+3. Modernização com o Arcabouço de Coleções de Java
+
+- O código foi refatorado para substituir o uso de arrays (Produto[]) pelas interfaces e classes do java.util.Collection Framework.
+
+- Mudança: Todos os métodos que antes recebiam ou retornavam Produto[] foram atualizados para usar java.util.List<Produto>. O processamento interno também foi adaptado para manipular Lists.
+
+- Adaptação de Algoritmos: Os algoritmos de ordenação QuickSort e InsertionSort foram adaptados para operar diretamente sobre List<Produto>, tirando proveito das funcionalidades do List (como acesso por índice e iteração).
+
+- Justificativa: O uso de coleções de Java (como ArrayList, LinkedList) oferece vantagens significativas:
+    
+    - Flexibilidade: Permitem o armazenamento de um número dinâmico de elementos, ao contrário dos arrays de tamanho fixo.
+    
+    - Segurança de Tipo: Com o uso de Generics (List<Produto>), o compilador garante a segurança dos tipos em tempo de compilação, prevenindo ClassCastExceptions em tempo de execução.
+    
+    - API Rica: O framework de coleções fornece métodos robustos e otimizados para manipulação de dados (adição, remoção, busca, iteração, etc.), tornando o código mais conciso, legível e menos propenso a erros.
+    
+    - Padronização: Adoção de uma prática comum e recomendada na linguagem Java, melhorando a manutenibilidade e a colaboração.
+
+4. Implementação de Novas Funcionalidades
+
+- As novas funcionalidades solicitadas no EP2.pdf foram implementadas, demonstrando a robustez e a extensibilidade da nova arquitetura baseada em padrões:
+
+    - Critérios de Ordenação em Ordem Decrescente: Conforme detalhado na seção 3.1, foram adicionadas três classes (CriterioDescricaoDecrescente, CriterioPrecoDecrescente, CriterioEstoqueDecrescente) que implementam a interface CriterioOrdenacao, permitindo a ordenação inversa dos produtos.
+    
+    - Critério de Filtragem por Intervalo de Preço: A classe FiltroPrecoIntervalo foi criada, implementando CriterioFiltragem, para selecionar produtos cujo preço se encontra em um dado intervalo, recebendo os valores mínimo e máximo como parâmetros.
+    
+    - Critério de Filtragem por Substring na Descrição: A classe FiltroDescricaoContem foi implementada, também estendendo CriterioFiltragem, para permitir a seleção de produtos cuja descrição contenha uma substring específica.
+    
+    - Decorador de Formatação para Cor: A classe ProdutoCorDecorator foi adicionada à hierarquia de decoradores, permitindo que o texto referente a um produto no relatório HTML possa ser formatado com uma cor arbitrária, expandindo as opções de personalização.
+    
+    - Carregamento de Produtos de um Arquivo CSV: Foi desenvolvida a funcionalidade para ler produtos de um arquivo CSV (como o exemplo produtos.csv fornecido), realizar o parsing dos dados e popular uma List<Produto>. Essa funcionalidade centraliza a lógica de carregamento de dados e a integração com o formato de arquivo externo.
+
+
+---------Conclusão e Benefícios Finais---------
+
+A refatoração do "Gerador de Relatórios" foi um sucesso em transformar um sistema monolítico e de difícil manutenção em uma aplicação orientada a objetos, modular e altamente extensível. A aplicação estratégica dos padrões Strategy e Decorator, em conjunto com a modernização para o arcabouço de coleções de Java, trouxe os seguintes benefícios:
+
+    - Alta Coesão e Baixo Acoplamento: As responsabilidades são claramente definidas e delegadas, reduzindo a interdependência entre os componentes.
+
+    - Extensibilidade Robusta: A adição de novos comportamentos (algoritmos, critérios, formatações) é agora uma tarefa trivial, que exige apenas a criação de novas classes que implementam as interfaces apropriadas, sem a necessidade de modificar o código existente. Isso exemplifica o Princípio Aberto/Fechado.
+
+    - Manutenibilidade Aprimorada: O código é mais legível, organizado e fácil de depurar, pois cada funcionalidade está encapsulada em seu próprio módulo.
+
+    - Flexibilidade Operacional: O sistema pode ser configurado dinamicamente para aplicar diferentes lógicas de negócio e formatações, atendendo a uma gama maior de necessidades de geração de relatórios.
+
+    - Adesão a Boas Práticas: O projeto agora segue as convenções modernas da linguagem Java e adota soluções de design comprovadas pela comunidade de engenharia de software.
+
+Este trabalho não apenas cumpriu todos os requisitos do EP2, mas também estabeleceu uma base sólida para futuras expansões do sistema, garantindo sua longevidade e adaptabilidade a novas demandas.

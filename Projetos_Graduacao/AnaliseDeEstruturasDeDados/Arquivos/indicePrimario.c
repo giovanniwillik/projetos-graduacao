@@ -134,6 +134,8 @@ REGISTRO exercicio3(Tabela *tabela, int nroUSP) {
 // 4. Escreva uma função para excluir todos os registros do curso X (use o índice). 
 
 void exercicio4(Tabela *tabela, FILE *arq, int curso) {
+    // fseek(arq, 0, SEEK_SET);
+    // pos = 0;
     for (int i = 0; i < tabela->tamanho; i++) {
         if (tabela->registros[i].curso == curso) {
             excluirIndice(tabela, tabela->registros[i].NroUSP); // Exclui do índice
@@ -144,7 +146,11 @@ void exercicio4(Tabela *tabela, FILE *arq, int curso) {
             r.valido = false;
             fseek(arq, tabela->registros[i].estado, SEEK_SET);
             fwrite(&r, sizeof(REGISTRO), 1, arq);
-        }
+        } 
+        // else {
+        //     pos += sizeof(REGISTRO);
+        // }
+        
     }
 }
 
