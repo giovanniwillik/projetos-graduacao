@@ -29,6 +29,7 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Scanner;
 
 public class GeradorDeRelatorios {
 
@@ -130,25 +131,85 @@ public class GeradorDeRelatorios {
         return produtos;
     }
 
+    private static void exibirAjuda() {
+        System.out.println("Uso passando args:");
+        System.out.println("\tjava " + GeradorDeRelatorios.class.getName() + " ALG=<algoritmo> CRITERIO_ORD=<critério de ordenação> CRITERIO_FILTRO=<critério de filtragem> PARAMETRO_FILTRO=<parâmetro de filtragem> NOME_ARQUIVO=<nome do arquivo CSV>");
+        System.out.println("Onde:");
+        System.out.println("\talgoritmo: 'quick' ou 'insertion'");
+        System.out.println("\tcriterio de ordenação: 'descricao_c', 'descricao_d', 'preco_c', 'preco_d', 'estoque_c' ou 'estoque_d'");
+        System.out.println("\tcriterio de filtragem: 'todos', 'estoque_menor_igual', 'categoria_igual', 'preco_intervalo' ou 'descricao_contem'");
+        System.out.println("\tparâmetro de filtragem: argumentos adicionais necessários para a filtragem (use '' para 'todos', 'quantidade' para estoque, 'categoria' para categoria, 'min-max' para preço, 'substring' para descrição)");
+        System.out.println("\tnome do arquivo CSV: caminho para o arquivo de dados de produtos (ex: produtos.csv)");
+        System.out.println("Valores padrões: ");
+        System.out.println("\tALG: quick");
+        System.out.println("\tCRITERIO_ORD: descricao_c");
+        System.out.println("\tCRITERIO_FILTRO: todos");
+        System.out.println("\tPARAMETRO_FILTRO: ");
+        System.out.println("\tNOME_ARQUIVO: data/produtos.csv");
+        System.out.println();
+    }
+
     public static void main(String [] args) {
-        if(args.length < 5){
-            System.out.println("Uso:");
-            System.out.println("\tjava " + GeradorDeRelatorios.class.getName() + " <algoritmo> <critério de ordenação> <critério de filtragem> <parâmetro de filtragem> <nome do arquivo CSV>");
-            System.out.println("Onde:");
-            System.out.println("\talgoritmo: 'quick' ou 'insertion'");
-            System.out.println("\tcriterio de ordenação: 'descricao_c', 'descricao_d', 'preco_c', 'preco_d', 'estoque_c' ou 'estoque_d'");
-            System.out.println("\tcriterio de filtragem: 'todos', 'estoque_menor_igual', 'categoria_igual', 'preco_intervalo' ou 'descricao_contem'");
-            System.out.println("\tparâmetro de filtragem: argumentos adicionais necessários para a filtragem (use '' para 'todos', 'quantidade' para estoque, 'categoria' para categoria, 'min-max' para preço, 'substring' para descrição)");
-            System.out.println("\tnome do arquivo CSV: caminho para o arquivo de dados de produtos (ex: produtos.csv)");
-            System.out.println();
+
+        String opcao_algoritmo;
+        String opcao_criterio_ord;
+        String opcao_criterio_filtro;
+        String opcao_parametro_filtro;
+        String nomeArquivoCSV = "data/produtos.csv"; // Padrão
+
+        // Verifica se os argumentos foram passados corretamente
+        if (args.length < 5) {
+            System.out.println("Parâmetros insuficientes. Vamos obter as informações interativamente.");
+            Scanner scanner = new Scanner(System.in);
+            
+            // Obter algoritmo
+            System.out.print("Qual algoritmo de ordenação? (quick ou insertion): ");
+            opcao_algoritmo = scanner.nextLine().trim();
+            
+            // Obter critério de ordenação
+            System.out.print("Qual critério de ordenação? (descricao_c, descricao_d, preco_c, preco_d, estoque_c ou estoque_d): ");
+            opcao_criterio_ord = scanner.nextLine().trim();
+            
+            // Obter critério de filtragem
+            System.out.print("Qual critério de filtragem? (todos, estoque_menor_igual, categoria_igual, preco_intervalo ou descricao_contem): ");
+            opcao_criterio_filtro = scanner.nextLine().trim();
+            
+            // Obter parâmetro de filtragem
+            System.out.print("Qual o parâmetro de filtragem? (use '' para 'todos', quantidade para 'estoque', categoria para 'categoria', min-max para 'preço', substring para 'descrição'): ");
+            opcao_parametro_filtro = scanner.nextLine().trim();
+            
+            scanner.close();
+        } else {
+            // Se tiver argumentos suficientes, use-os diretamente
+            opcao_algoritmo = args[0];
+            opcao_criterio_ord = args[1];
+            opcao_criterio_filtro = args[2];
+            opcao_parametro_filtro = args[3];
+            nomeArquivoCSV = args[4];
+        }
+        
+        // Validação básica dos argumentos
+        boolean algoritmoValido = opcao_algoritmo.equals("quick") || opcao_algoritmo.equals("insertion");
+        boolean criterioOrdValido = opcao_criterio_ord.matches("(descricao|preco|estoque)_(c|d)");
+        boolean criterioFiltroValido = opcao_criterio_filtro.equals("todos") || 
+                                      opcao_criterio_filtro.equals("estoque_menor_igual") ||
+                                      opcao_criterio_filtro.equals("categoria_igual") ||
+                                      opcao_criterio_filtro.equals("preco_intervalo") ||
+                                      opcao_criterio_filtro.equals("descricao_contem");
+        
+        if (!algoritmoValido || !criterioOrdValido || !criterioFiltroValido) {
+            System.out.println("Um ou mais parâmetros inválidos foram fornecidos.");
+            exibirAjuda();
             System.exit(1);
         }
-
-        String opcao_algoritmo = args[0];
-        String opcao_criterio_ord = args[1];
-        String opcao_criterio_filtro = args[2];
-        String opcao_parametro_filtro = args[3];
-        String nomeArquivoCSV = args[4];
+        
+        // Continuar com a execução normal do programa usando os argumentos obtidos
+        System.out.println("\nExecutando com os seguintes parâmetros:");
+        System.out.println("Algoritmo: " + opcao_algoritmo);
+        System.out.println("Critério de ordenação: " + opcao_criterio_ord);
+        System.out.println("Critério de filtragem: " + opcao_criterio_filtro);
+        System.out.println("Parâmetro de filtragem: " + opcao_parametro_filtro);
+        System.out.println("Arquivo CSV: " + nomeArquivoCSV);
 
         AlgoritmoOrdenacao algoritmoOrdenacao = null;
         if ("quick".equalsIgnoreCase(opcao_algoritmo)) {

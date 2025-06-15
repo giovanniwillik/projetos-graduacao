@@ -1,0 +1,124 @@
+-------------Autores-------------
+
+
+Giovanni Willik Del Piccolo - 15455979
+Lion Chen - 154700100
+
+
+-------------Descrição-------------
+
+
+O objetivo deste Exercício-Programa (EP2) foi refatorar o código de um "Gerador de Relatórios" em Java, visando modernizá-lo, torná-lo mais orientado a objetos e extensível. As principais diretrizes da refatoração incluíram o emprego dos padrões de projeto Strategy e Decorator, a adoção do arcabouço de coleções de Java e a implementação de novas funcionalidades.
+
+
+-------------Arquivos e diretórios-------------
+
+
+GeradorDeRelatoriosProject/
+├── src/
+│   ├── com/
+│   │   └── example/
+│   │       └── relatorios/
+│   │           ├── GeradorDeRelatorios.java     // Classe principal com main e lógica de carregamento CSV
+│   │           ├── model/
+│   │           │   ├── Produto.java             // Interface do Produto
+│   │           │   └── ProdutoPadrao.java       // Implementação concreta
+│   │           ├── strategy/
+│   │           │   ├── sorting/
+│   │           │   │   ├── AlgoritmoOrdenacao.java            // Interface Strategy
+│   │           │   │   ├── QuickSort.java                     // Concrete Strategy
+│   │           │   │   ├── InsertionSort.java                 // Concrete Strategy
+│   │           │   │   ├── CriterioDescricaoCrescente.java    // Concrete Comparator
+│   │           │   │   ├── CriterioDescricaoDecrescente.java  // Concrete Comparator
+│   │           │   │   ├── CriterioPrecoCrescente.java        // Concrete Comparator
+│   │           │   │   ├── CriterioPrecoDecrescente.java      // Concrete Comparator
+│   │           │   │   ├── CriterioEstoqueCrescente.java      // Concrete Comparator
+│   │           │   │   └── CriterioEstoqueDecrescente.java    // Concrete Comparator
+│   │           │   └── filtering/
+│   │           │       ├── CriterioFiltragem.java         // Interface Strategy
+│   │           │       ├── FiltroTodos.java               // Concrete Strategy
+│   │           │       ├── FiltroEstoqueMenorIgual.java   // Concrete Strategy
+│   │           │       ├── FiltroCategoriaIgual.java      // Concrete Strategy
+│   │           │       ├── FiltroPrecoIntervalo.java      // Concrete Strategy
+│   │           │       └── FiltroDescricaoContem.java     // Concrete Strategy
+│   │           └── decorator/
+│   │               ├── ProdutoDecorator.java              // Abstract Decorator
+│   │               ├── ProdutoNegritoDecorator.java       // Concrete Decorator
+│   │               ├── ProdutoItalicoDecorator.java       // Concrete Decorator
+│   │               └── ProdutoCorDecorator.java           // Concrete Decorator
+├── data/
+│   └── produtos.csv    // Arquivo de dados
+├── docs/
+│   └── relatorio.txt
+├── LEIAME.txt    // Esse arquivo
+├── Makefile      // Arquivo de configuração para rodar o projeto usando make
+└── out/    // Diretório para arquivos compilados
+
+
+-------------Pré-requisitos-------------
+
+
+- Java SE Development Kit (JDK) 21 ou superior instalado.
+- GNU Make (versão 4.4.1 ou compatível) instalado (caso for rodar o projeto usando make).
+- Sistema operacional recomendado: Linux (x86_64) ou Windows com MSYS2 configurado (caso for rodar o projeto usando make).
+
+
+-------------Instruções de compilação e execução (linha de comando)-------------
+
+
+1. Abra um terminal e navegue até a raiz deste projeto (onde está o arquivo `Makefile`).
+
+2. Para compilar os arquivos .java desenvolvidos, digite:
+
+   make
+
+   Este comando criará o diretório `out/` e compilará os arquivos em `src/`, gerando os arquivos `.class` no mesmo diretório `src/`.
+
+3. Para executar o programa passando os argumentos por linha de comando, digite:
+
+   make run1 ALG=<algoritmo> CRITERIO_ORD=<critério de ordenação> CRITERIO_FILTRO=<critério de filtragem> PARAMETRO_FILTRO=<parâmetro de filtragem> NOME_ARQUIVO=<nome do arquivo CSV>
+
+   Esse comando executará a aplicação iniciando pela classe principal `GeradorDeRelatórios`, incluindo o diretório `src/` no classpath.
+
+   Não é obrigatório o preenchimento de todas as variáveis. Caso uma ou outra não seja preenchida, ela tomara seu valor padrão, conforme especificado:
+      ALG: quick / CRITERIO_ORD: descricao_c / CRITERIO_FILTRO: todos / PARAMETRO_FILTRO: '' / NOME_ARQUIVO: data/produtos.csv
+
+4. Para executar o programa passando os valores por meio da interação com o programa, digite:
+
+   make run2
+
+   Esse comando executará a aplicação iniciando pela classe principal `GeradorDeRelatórios`, incluindo o diretório `src/` no classpath.
+
+   Nessa execução, todas as variáveis devem ser oferecidas, conforme solicitado após a execução, exceto o nome do arquivo, que toma o valor padrão data/produtos.csv
+
+5. Para remover os arquivos compilados e o arquivo saida.html, digite:
+
+   make clean
+
+
+-------------Instruções de compilação e execução (IDE)-------------
+
+
+1. Abra o projeto em sua IDE (IntelliJ, VS Code, ...)
+
+2. No terminal da IDE, navegue para dentro da pasta raiz do projeto (onde está o Makefile)
+
+3. Execute o comando de compilação para compilar todos os arquivos Java do projeto:
+
+   javac -d out src/com/example/relatorios/*.java src/com/example/relatorios/model/*.java src/com/example/relatorios/strategy/sorting/*.java src/com/example/relatorios/strategy/filtering/*.java src/com/example/relatorios/decorator/*.java
+
+4. Após todos os arquivos serem compilados com sucesso, execute a classe principal do projeto com o comando:
+
+   java -cp out com.example.relatorios.GeradorDeRelatorios <alg> <c_ord> <c_fil> <par_fil> <n_arq>
+
+   algoritmo (alg): 'quick' ou 'insertion'
+   criterio de ordenação (c_ord): 'descricao_c', 'descricao_d', 'preco_c', 'preco_d', 'estoque_c' ou 'estoque_d'
+   criterio de filtragem (c_fil): 'todos', 'estoque_menor_igual', 'categoria_igual', 'preco_intervalo' ou 'descricao_contem'
+   parâmetro de filtragem (par_fil): argumentos adicionais necessários para a filtragem (use '' para 'todos', 'quantidade' para estoque, 'categoria' para categoria, 'min-max' para preço, 'substring' para descrição)
+   nome do arquivo CSV (n_arq): caminho para o arquivo de dados de produtos (valor esperado: data/produtos.csv)
+
+   Diferentemente do make run1 em Makefile, aqui é requisutado que todos os args sejam preenchidos
+
+5. Para executar com entrada interativa (sem argumentos):
+
+   java -cp out com.example.relatorios.GeradorDeRelatorios

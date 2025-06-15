@@ -28,7 +28,7 @@ public class GeradorDeRelatorios {
 	private String criterio;
 	private String filtro;
 	private String argFiltro;
-	private int format_flags;	
+	private int format_flags;
 
 	public GeradorDeRelatorios(Produto [] produtos, String algoritmo, String criterio, String filtro, String argFiltro, int format_flags){
 
