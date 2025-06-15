@@ -105,7 +105,7 @@ GeradorDeRelatoriosProject/
 
 3. Execute o comando de compilação para compilar todos os arquivos Java do projeto:
 
-   javac -d out src/com/example/relatorios/*.java src/com/example/relatorios/model/*.java src/com/example/relatorios/strategy/sorting/*.java src/com/example/relatorios/strategy/filtering/*.java src/com/example/relatorios/decorator/*.java
+   javac -d out src/com/example/relatorios/.java src/com/example/relatorios/model/.java src/com/example/relatorios/strategy/sorting/.java src/com/example/relatorios/strategy/filtering/.java src/com/example/relatorios/decorator/.java
 
 4. Após todos os arquivos serem compilados com sucesso, execute a classe principal do projeto com o comando:
 
@@ -122,3 +122,35 @@ GeradorDeRelatoriosProject/
 5. Para executar com entrada interativa (sem argumentos):
 
    java -cp out com.example.relatorios.GeradorDeRelatorios
+
+
+-------------Sobre o projeto-------------
+
+
+Este projeto é uma aplicação Java robusta e flexível para a geração de relatórios de produtos customizáveis em formato HTML. Desenvolvido com foco em modularidade e extensibilidade, ele permite a manipulação e apresentação de dados de produtos de diversas formas.
+
+1. O Que o Programa Faz?
+
+   O "Gerador de Relatórios de Produtos" processa uma lista de produtos, aplicando critérios configuráveis de ordenação, filtragem e formatação, para então exportar o resultado em um arquivo HTML pronto para visualização.
+
+2. Principais Funcionalidades:
+
+   - Entrada de Dados: Carrega informações de produtos a partir de arquivos CSV.
+   - Ordenação Dinâmica:
+      - Suporta múltiplos algoritmos de ordenação (e.g., Quicksort, Insertion Sort).
+      - Permite ordenar produtos por diferentes atributos (descrição, preço, quantidade em estoque), tanto em ordem crescente quanto decrescente.
+   - Filtragem Avançada:
+      - Seleciona produtos com base em critérios como estoque mínimo/máximo, categoria específica, faixa de preço ou se a descrição contém uma substring definida.
+   - Formatação Flexível:
+      - Aplica opções de formatação de texto (negrito, itálico, cor) de forma individualizada para cada produto no relatório HTML. As formatações podem ser combinadas dinamicamente.
+   - Saída HTML: Gera um arquivo HTML estruturado e legível, contendo a listagem dos produtos formatada conforme as configurações escolhidas.
+
+3. Arquitetura e Design:
+
+O projeto foi refatorado utilizando os princípios da Programação Orientada a Objetos (POO) e padrões de design consolidados:
+
+   - Padrão Strategy: Garante a flexibilidade na escolha e adição de novos algoritmos de ordenação e critérios de filtragem, desacoplando a lógica da sua execução.
+   - Padrão Decorator: Permite a aplicação dinâmica e combinável de múltiplas opções de formatação a cada produto, sem modificar suas classes base.
+   - Java Collections Framework: Utiliza as estruturas de coleção padrão do Java para um manuseio eficiente e seguro dos dados dos produtos.
+
+Este design garante que o sistema seja facilmente extensível, permitindo a adição de novas funcionalidades (algoritmos, filtros, formatações) sem a necessidade de modificar o código existente do gerador.
