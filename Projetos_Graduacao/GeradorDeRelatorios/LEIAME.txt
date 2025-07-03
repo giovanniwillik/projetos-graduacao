@@ -19,7 +19,9 @@ GeradorDeRelatoriosProject/
 │   ├── com/
 │   │   └── example/
 │   │       └── relatorios/
-│   │           ├── GeradorDeRelatorios.java     // Classe principal com main e lógica de carregamento CSV
+│   │           ├── GeradorDeRelatorios.java     // Classe principal geradora de relatorios com main 
+│   │           ├── RelatorioCLI.java            // Classe para interação com usuário (Command Line Interface)
+│   │           ├── LeitorCSV.java               // Classe para a lógica de carregamento CSV
 │   │           ├── model/
 │   │           │   ├── Produto.java             // Interface do Produto
 │   │           │   └── ProdutoPadrao.java       // Implementação concreta
@@ -78,10 +80,12 @@ GeradorDeRelatoriosProject/
 
    make run1 ALG=<algoritmo> CRITERIO_ORD=<critério de ordenação> CRITERIO_FILTRO=<critério de filtragem> PARAMETRO_FILTRO=<parâmetro de filtragem> NOME_ARQUIVO=<nome do arquivo CSV>
 
+   TODOS os valores precisam, nessa execução, precisam ser passados dentro de aspas simples (para PARAMETRO_FILTRO nulo, passar assim: '""')
+
    Esse comando executará a aplicação iniciando pela classe principal `GeradorDeRelatórios`, incluindo o diretório `src/` no classpath.
 
    Não é obrigatório o preenchimento de todas as variáveis. Caso uma ou outra não seja preenchida, ela tomara seu valor padrão, conforme especificado:
-      ALG: quick / CRITERIO_ORD: descricao_c / CRITERIO_FILTRO: todos / PARAMETRO_FILTRO: '' / NOME_ARQUIVO: data/produtos.csv
+      ALG: quick / CRITERIO_ORD: descricao_c / CRITERIO_FILTRO: todos / PARAMETRO_FILTRO: "" / NOME_ARQUIVO: data/produtos.csv
 
 4. Para executar o programa passando os valores por meio da interação com o programa, digite:
 
