@@ -2,7 +2,7 @@
 
 
 Giovanni Willik Del Piccolo - 15455979
-Lion Chen - 154700100
+Lion Chen - 15470010
 
 
 -------------Descrição-------------
@@ -80,7 +80,7 @@ GeradorDeRelatoriosProject/
 
    make run1 ALG=<algoritmo> CRITERIO_ORD=<critério de ordenação> CRITERIO_FILTRO=<critério de filtragem> PARAMETRO_FILTRO=<parâmetro de filtragem> NOME_ARQUIVO=<nome do arquivo CSV>
 
-   TODOS os valores precisam, nessa execução, precisam ser passados dentro de aspas simples (para PARAMETRO_FILTRO nulo, passar assim: '""')
+   TODOS os valores precisam, nessa execução, ser passados dentro de aspas simples (para PARAMETRO_FILTRO nulo, passar assim: '""')
 
    Esse comando executará a aplicação iniciando pela classe principal `GeradorDeRelatórios`, incluindo o diretório `src/` no classpath.
 

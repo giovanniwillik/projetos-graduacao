@@ -9,7 +9,7 @@ O objetivo deste Exercício-Programa (EP2) foi refatorar o código de um "Gerado
 
 ---------Detalhamento das Modificações Arquiteturais e Implementações---------
 
-Para resolver os problemas supracitados e atender às exigências do EP2.pdf, as seguintes modificações foram sistematicamente aplicadas:
+Para resolver os problemas levantados e atender às exigências do EP2, as seguintes modificações foram aplicadas:
 
 1.Aplicação do Padrão Strategy
 
@@ -41,7 +41,7 @@ Para resolver os problemas supracitados e atender às exigências do EP2.pdf, as
     - Impacto na Classe GeradorDeRelatorios:
 
         - A classe GeradorDeRelatorios agora mantém instâncias das interfaces AlgoritmoOrdenacao, CriterioOrdenacao e CriterioFiltragem.
-        - Sua lógica foi simplificada, pois ela delega a execução da ordenação e filtragem para as estratégias configuradas, tornando-a agnóstica aos detalhes de implementação específicos.
+        - Sua lógica foi simplificada, pois ela delega a execução da ordenação e filtragem para as estratégias configuradas, tornando-a encapsuladas aos detalhes de implementação específicos.
         - Justificativa: A aplicação do Strategy transformou os aspectos comportamentais 1, 2 e 3 em módulos plugáveis. Isso resultou em um acoplamento muito baixo entre GeradorDeRelatorios e os algoritmos/critérios, permitindo adicionar novas lógicas de ordenação ou filtragem (como os critérios decrescentes ou os novos filtros) sem modificar a classe GeradorDeRelatorios — um exemplo claro do Princípio Aberto/Fechado em ação.
 
 2. Aplicação do Padrão Decorator
@@ -52,7 +52,7 @@ Para resolver os problemas supracitados e atender às exigências do EP2.pdf, as
 
 - Classes/Interfaces Criadas/Modificadas:
 
-    - A interface Produto (existente) atua como o componente base a ser decorado. Ela foi mantida inalterada, conforme restrição do EP2.pdf.
+    - A interface Produto (existente) atua como o componente base a ser decorado. Ela foi mantida inalterada, conforme restrição do EP2.
 
     - Foi criada uma classe abstrata ProdutoDecorator, que implementa a interface Produto e mantém uma referência para um objeto Produto encapsulado.
 
@@ -66,8 +66,8 @@ Para resolver os problemas supracitados e atender às exigências do EP2.pdf, as
 
         - A responsabilidade de aplicar tags HTML de formatação foi movida para as classes Decorator.
         - Cada instância de Produto que precisa de formatação específica pode ser "envolvida" por um ou mais decoradores. Por exemplo, new ProdutoNegritoDecorator(new ProdutoItalicoDecorator(produtoOriginal)).
-        - Isso permite a formatação individualizada e a combinação de múltiplas formatações para um único produto, algo impossível na versão original.
-        - Justificativa: O Decorator resolve o problema da formatação global de forma elegante. Em vez de uma explosão de subclasses (ProdutoNegritoItalico, ProdutoNegritoItalicoColorido, etc.), o sistema permite a composição dinâmica de funcionalidades de formatação. A aderência à restrição de não modificar Produto ou ProdutoPadrao foi crucial, e o Decorator permitiu adicionar funcionalidades sem tocar nessas classes base.
+        - Isso permite a formatação individualizada e a combinação de múltiplas formatações para um único produto.
+        - Justificativa: O Decorator resolve o problema da formatação global de forma elegante. Em vez de várias subclasses (ProdutoNegritoItalico, ProdutoNegritoItalicoColorido, etc.), o sistema permite a composição dinâmica de funcionalidades de formatação, sem alterar as classes base.
 
 3. Modernização com o Arcabouço de Coleções de Java
 
@@ -83,13 +83,13 @@ Para resolver os problemas supracitados e atender às exigências do EP2.pdf, as
     
     - Segurança de Tipo: Com o uso de Generics (List<Produto>), o compilador garante a segurança dos tipos em tempo de compilação, prevenindo ClassCastExceptions em tempo de execução.
     
-    - API Rica: O framework de coleções fornece métodos robustos e otimizados para manipulação de dados (adição, remoção, busca, iteração, etc.), tornando o código mais conciso, legível e menos propenso a erros.
+    - API Rica: O framework de coleções fornece métodos otimizados para manipulação de dados (adição, remoção, busca, iteração, etc.), tornando o código mais conciso, legível e menos propenso a erros.
     
     - Padronização: Adoção de uma prática comum e recomendada na linguagem Java, melhorando a manutenibilidade e a colaboração.
 
 4. Implementação de Novas Funcionalidades
 
-- As novas funcionalidades solicitadas no EP2.pdf foram implementadas, demonstrando a robustez e a extensibilidade da nova arquitetura baseada em padrões:
+- As novas funcionalidades solicitadas no EP2 foram implementadas, demonstrando a extensibilidade da nova arquitetura baseada em padrões:
 
     - Critérios de Ordenação em Ordem Decrescente: Conforme detalhado na seção 3.1, foram adicionadas três classes (CriterioDescricaoDecrescente, CriterioPrecoDecrescente, CriterioEstoqueDecrescente) que implementam a interface CriterioOrdenacao, permitindo a ordenação inversa dos produtos.
     
@@ -101,19 +101,20 @@ Para resolver os problemas supracitados e atender às exigências do EP2.pdf, as
     
     - Carregamento de Produtos de um Arquivo CSV: Foi desenvolvida a funcionalidade para ler produtos de um arquivo CSV (como o exemplo produtos.csv fornecido), realizar o parsing dos dados e popular uma List<Produto>. Essa funcionalidade centraliza a lógica de carregamento de dados e a integração com o formato de arquivo externo.
 
+- Refatorações extras:
+
+    - Criação da classe LeitorCSV: Foi desenvolvida a classe LeitorCSV com a responsabilidade de ler um arquivo em formato CSV e retornar uma lista de todos seus produtos, incluindo suas opções de formatação. Dessa forma encapsula-se o processo de leitura dos dados na geração de relatórios.
+
+    - Criação da classe RelatorioCLI: Foi desenvolvida a classe RelatorioCLI com a responsabilidade de captar os parâmetros referentes ao algoritmo, ao criterio de ordenação, ao criterio de filtragem, ao parametro do filtro e ao nome do arquivo CSV, e interagir com o usuário por meio da CLI (Command Line Interface), para organizar melhor o código conforme o princípio da responsabilidade única e propiciar uma melhor experiência de usuário.
 
 ---------Conclusão e Benefícios Finais---------
 
-A refatoração do "Gerador de Relatórios" foi um sucesso em transformar um sistema monolítico e de difícil manutenção em uma aplicação orientada a objetos, modular e altamente extensível. A aplicação estratégica dos padrões Strategy e Decorator, em conjunto com a modernização para o arcabouço de coleções de Java, trouxe os seguintes benefícios:
+A refatoração do "Gerador de Relatórios" permitiu transformar um sistema de difícil manutenção em uma aplicação orientada a objetos, modular e altamente extensível. A aplicação estratégica dos padrões Strategy e Decorator, em conjunto com a modernização para o arcabouço de coleções de Java, trouxe os seguintes benefícios:
 
     - Alta Coesão e Baixo Acoplamento: As responsabilidades são claramente definidas e delegadas, reduzindo a interdependência entre os componentes.
 
-    - Extensibilidade Robusta: A adição de novos comportamentos (algoritmos, critérios, formatações) é agora uma tarefa trivial, que exige apenas a criação de novas classes que implementam as interfaces apropriadas, sem a necessidade de modificar o código existente. Isso exemplifica o Princípio Aberto/Fechado.
+    - Extensibilidade: A adição de novos comportamentos (algoritmos, critérios, formatações) é agora uma tarefa trivial, que exige apenas a criação de novas classes que implementam as interfaces apropriadas, sem a necessidade de modificar o código existente. Isso exemplifica o Princípio Aberto/Fechado.
 
     - Manutenibilidade Aprimorada: O código é mais legível, organizado e fácil de depurar, pois cada funcionalidade está encapsulada em seu próprio módulo.
 
     - Flexibilidade Operacional: O sistema pode ser configurado dinamicamente para aplicar diferentes lógicas de negócio e formatações, atendendo a uma gama maior de necessidades de geração de relatórios.
-
-    - Adesão a Boas Práticas: O projeto agora segue as convenções modernas da linguagem Java e adota soluções de design comprovadas pela comunidade de engenharia de software.
-
-Este trabalho não apenas cumpriu todos os requisitos do EP2, mas também estabeleceu uma base sólida para futuras expansões do sistema, garantindo sua longevidade e adaptabilidade a novas demandas.
